@@ -4,22 +4,23 @@
 
 ---
 
-### 1. Die Eingangsseite (Cover Screen) & Agenten-Registrierung
+### 1. Die Eingangsseite (Cover Screen) – "Weniger ist mehr"
 
-Beim ersten Öffnen der Web-App empfängt den Spieler ein stimmungsvoller, aufgeräumter Startbildschirm ohne verwirrende Textberge:
-* **Titel:** `OPERATION SCHATTENTAUSCH – DER ZWISCHENFALL`
-* **Untertitel:** Grenzabschnitt Bayern (Münchenreuth) / Sachsen (Gutenfürst) 1983.
+Beim ersten Öffnen der Web-App empfängt den Spieler ein hochästhetischer, minimalistischer Startbildschirm ohne ermüdende Textwüsten:
+* **Titel:** `OPERATION SCHATTENTAUSCH`
+* **Untertitel:** `GEFANGENENAUSTAUSCH AM GRENZGRABEN (BAYERN / SACHSEN 1983)`
+* **Missionshintergrund diskret:**
+  * Statt den Bildschirm mit langen Textabsätzen zu überladen, steht ein dezenter Button zur Verfügung:  
+    `[ 📜 STORY & HINTERGRUND ANZEIGEN ]` öffnet ein kompaktes, stilvolles Modal für Story-Liebhaber.
 * **Owner-Branding:**
   * Schräg aufgeklebter Dienstausweis mit `avatar.jpg` (ca. -3° rotiert, Büroklammer, Schattenwurf).
   * Schriftzug: **`Made by Versteckules`**
   * *Owner-Geheimfunktion:* Ein schneller Dreifachklick auf das Avatarbild schaltet die Test- und Simulationsleiste frei.
-* **Agenten-Registrierung (Erst Name eingeben, dann Seite wählen):**
+* **Agenten-Registrierung (Schnell & intuitiv):**
   * Prominentes Eingabefeld: `Codename / Agentenname (z.B. Adler-7, Sperber, Versteckules)`.
   * Verhindert unpersönliche Sessions; Name wird dauerhaft gespeichert und im gesamten HUD angezeigt.
   * Erst nach Eingabe eines Namens werden die beiden Einsatzseiten freigeschaltet.
-* **Keine störenden Test-Hinweise:**
-  * Öffentliche Hinweise oder Platzhalter wie `OFFLINETEST` wurden vollständig von der Startseite und aus dem Terminal entfernt, um Spieler nicht zu verwirren. `OFFLINETEST` bleibt als verdecktes Easter-Egg für Tester aktiv.
-* **Fraktions-Auswahl:**
+* **Fraktions-Auswahl (2 kontrastreiche Tasten):**
   * `[ 🦁 MISSION WEST (Bayern / BND) ]` – Start bei Münchenreuth (`50.330406, 12.069081`)
   * `[ ⚒️ MISSION OST (Sachsen / MfS) ]` – Start bei Gutenfürst (`50.331520, 12.069700`)
 * **Owner-Direktlink:** Am Fuß der Seite diskreter Link zu `admin.html` (HQ Final-Editor).
@@ -53,24 +54,69 @@ Um Textüberladung zu vermeiden und den Spielern glasklar zu vermitteln, was vor
 
 ---
 
-### 2. Taktisches HUD, Hybrid-OpenStreetMap & Menü-Leiste
+### 2. Die Stationen: "Klipp & Klar" Outdoor-Architektur
+
+Im Gelände herrscht maximale Klarheit. Jeder Akt und jede Station folgt einer standardisierten, sofort erfassbaren **3-Punkte-Struktur**:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 🎯 STATION X VON 5: [NAME DER STATION]                          │
+│ ─────────────────────────────────────────────────────────────── │
+│ 📍 ZIELORT: [Genauer Punkt] • Distanz: [xx m]                   │
+│    [ 🗺️ AUF DER KARTE ANZEIGEN ]                                │
+│ ─────────────────────────────────────────────────────────────── │
+│ 🔍 DEINE AUFGABE VOR ORT:             [ 🔊 VORLESEN ]           │
+│    1. Präziser Handlungsschritt am Grenzpfad.                   │
+│    2. Konkreter Gegenstand / Information, die gesucht wird.     │
+│ ─────────────────────────────────────────────────────────────── │
+│ ⚡ CODE EINGEBEN / AKTION:                                      │
+│    [ Eingabefeld               ]   [ BESTÄTIGEN ✓ ]             │
+│    💡 Kurzer unmissverständlicher Tipp                          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+* **Keine doppelten Eingabefelder:** Frühere redundante Befehlszeilen am Fuß des Bildschirms wurden entfernt. Es gibt genau ein aktives Eingabefeld pro Station.
+* **Keine Textwüsten:** Statt ausschweifender Romantexte erhält der Cacher 1 bis maximal 2 stichpunktartige Handlungsanweisungen.
+* **Vorlese-Funktion pro Station:** Ein dezenter Button `[ 🔊 VORLESEN ]` liest die aktuelle Aufgabe mit angenehmer Stimme vor (ideal beim Gehen mit Kopfhörern).
+* **Aufgeräumter Bildschirm:** System-Logs und Entwickler-Konsole sind in einer eleganten einklappbaren Schublade (`<details class="terminal-log-drawer">`) am unteren Rand verstaut.
+
+---
+
+### 2.5. Karten-Garantie (Map Engine & Edge-to-Edge Navigation)
+
+1. **Behebung des 0-Pixel-Kollapses:**
+   * Durchgängige CSS-Flexbox-Vererbung (`.tab-content-area` mit `min-height: 0; display: flex; flex-direction: column`) garantiert, dass `#map-container` unter iOS Safari, Chrome Mobile und Android immer die volle verfügbare Bildschirmhöhe ausfüllt.
+2. **Zuverlässige Kacheln (100% Verfügbarkeit):**
+   * Standardmäßig angebundene OpenStreetMap-Kacheln (`tile.openstreetmap.org`) mit lokalem phosphor-grünem bzw. bernsteinfarbenem Retro-Militärfilter (CSS `invert` & `hue-rotate`). Keine Abhängigkeit von externen API-Keys oder blockierten Drittanbieter-CDNs.
+   * Sollte im Funkloch kein Internetempfang bestehen, schaltet die App mit einem Klick auf die integrierte **SVG-Vektorkarte** um.
+3. **Nahtlose 2-Wege-Navigation:**
+   * An jeder Station bringt ein Klick auf `[ 🗺️ AUF DER KARTE ANZEIGEN ]` den Spieler direkt zur Karte, zentriert auf die Station (Zoomstufe 17) und öffnet das Info-Popup.
+   * Auf der Karte befindet sich ein schwebender Button `[ 📟 ZUR STATION ]`, mit dem man blitzschnell zur Eingabe zurückkehrt.
+4. **Mehrstufige Geometrie-Reparatur (`invalidateSize`):**
+   * Beim Tab-Wechsel auf die Karte wird Leaflet mehrfach gestaffelt (40ms, 120ms, 250ms, 500ms) re-initialisiert, um Rendering-Verzögerungen bei CSS-Animationen vollständig abzufangen.
+
+---
+
+### 2.8. Akustisches Balancing (Kein lautes Rauschen beim Vorlesen)
+
+* **Dezenter Radio-Squelch:** Beim Auslösen der Sprachausgabe (`AudioEngine.speakText`) wird das Funkrauschen auf eine sehr leise Lautstärke von **0.12** gedämpft und nach **350 Millisekunden** automatisch ausgeblendet. Es ertönt ein kurzes, authentisches Knacken ("chrrk") wie beim Einschalten eines Funkgeräts, danach ist die Stimme glasklar und ungestört verständlich.
+* **Lautstärkesteuerung für alle Sounds:** `AudioEngine.play(...)` unterstützt nun explizite Lautstärkeparameter (`volume = 1.0`).
+* **Hintergrund-Schleifen gedämpft:** Störfunk- und Radioschleifen laufen auf subtilen **0.08** Lautstärke, um eine stimmungsvolle Atmosphäre zu schaffen, ohne die Nerven der Spieler im Gelände zu strapazieren.
+
+---
+
+### 3. Taktisches HUD, Hybrid-OpenStreetMap & Menü-Leiste
 
 Die Benutzeroberfläche ist wie ein portabler militärischer Lagekoffer der 1980er Jahre aufgebaut:
 
 #### A) Taktische Menü-Tabs (Immer erreichbar am unteren/oberen Rand):
 1. 📟 **TERMINAL:** Hauptansicht für Funksprüche, Notrufe mit Vibration, Dialekt-Audios, Replay-Button und Eingabefeld.
-   * Neuer Button: `[ 📋 Einsatzbefehl anzeigen & vorlesen ]` zum jederzeitigen Wiederaufrufen des Intros.
 2. 🗺️ **KARTE (Hybrid OpenStreetMap & Vektor-Fallback):**
-   * *100% Offline-Sicherheit:* Vollständig lokale Leaflet-Bibliothek (`css/leaflet.css`, `js/leaflet.js`) ohne externe CDN-Abhängigkeit im Wald.
-   * *Zuverlässige Geometrieberechnung:* Beseitigung von `NaN`-Zoomfehlern durch verzögerte Geometrie-Initialisierung (`onTabVisible()`).
-   * *On-Map Tactical Toolbar:* Direkt auf der Karte verankerte Schnellwahltasten:
-     * `🎯 STANDORT`: Zentriert die Karte sofort auf die Live-GPS-Position.
-     * `📍 ROUTE`: Passt die Ansicht metergenau auf den gesamten Grenzpfad an (`fitBounds`).
-     * `🛰️ VEKTOR`: Schaltet manuell auf die taktile Vektorkarte um, falls im dichten Wald kein Datenempfang besteht.
-   * *Zoom-Steuerung:* Hochkontrast-Buttons (+/-) im Retro-Militärdesign.
+   * Vollständig lokale Leaflet-Bibliothek (`css/leaflet.css`, `js/leaflet.js`) ohne externe CDN-Abhängigkeit im Wald.
+   * On-Map Tactical Toolbar mit `[ 📟 ZUR STATION ]`, `🎯 STANDORT`, `📍 ROUTE`, `🛰️ VEKTOR`.
    * Zeigt den befestigten Grenzweg, die Grenzlinie Bayern/Sachsen, alle Wegpunkte und den eigenen GPS-Standort (pulsierender Radar-Blip).
-3. 📁 **DOSSIERS:** Aktenmappe mit individuellen Polaroid-Passfotos aller 7 beteiligten Personen (inklusive Umschaltung auf Restlichtverstärker/NVG für UV-Geheimtinte).
-4. 📻 **FUNK / RADAR:** Analoger Kurzwellen-Tuner (Oszilloskop, Zahlensender, KGB-Kanal) und Geigerzähler-Anzeige.
+3. 📁 **DOSSIERS:** Aktenmappe mit individuellen Polaroid-Passfotos aller 7 beteiligten Personen (inklusive Restlichtverstärker/NVG).
+4. 📻 **FUNK / RADAR:** Analoger Kurzwellen-Tuner und Geigerzähler-Anzeige.
 
 #### B) GPS-Kompass & Entfernungspeilung:
 * Zeigt permanent die **genaue Restdistanz in Metern** (z.B. `Distanz: 38 m`) und eine animierte **Peilkompass-Nadel** zum nächsten Wegpunkt.

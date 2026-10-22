@@ -39,8 +39,9 @@ class AudioEngineClass {
      * @param {number} speed Multiplier (1.35 for fast dialect)
      * @param {boolean} isSpeech Whether this can be replayed
      * @param {boolean} loop
+     * @param {number} volume Volume 0.0 to 1.0 (default 1.0)
      */
-    play(relativePath, speed = 1.0, isSpeech = true, loop = false) {
+    play(relativePath, speed = 1.0, isSpeech = true, loop = false, volume = 1.0) {
         this.init();
 
         // Stop current speech if any
@@ -52,6 +53,7 @@ class AudioEngineClass {
         const audio = new Audio(relativePath);
         audio.playbackRate = speed;
         audio.loop = loop;
+        audio.volume = Math.max(0, Math.min(1, volume));
 
         if (isSpeech) {
             this.currentAudio = audio;
@@ -131,7 +133,7 @@ class AudioEngineClass {
     }
 
     /**
-     * Read aloud text via SpeechSynthesis (German) with optional sound FX
+     * Read aloud text via SpeechSynthesis (German) with subtle radio squelch
      */
     speakText(text, options = {}, onStart = null, onEnd = null) {
         this.init();
@@ -143,9 +145,17 @@ class AudioEngineClass {
 
         window.speechSynthesis.cancel();
 
-        // Optional short radio squelch
+        // Subtle, gentle radio squelch (0.12 volume) that cuts off after 350ms so voice is crystal clear
         if (options.radioClick !== false) {
-            this.play("assets/audio/radio_static.wav", 1.8, false);
+            const squelch = this.play("assets/audio/radio_static.wav", 1.8, false, false, 0.12);
+            if (squelch) {
+                setTimeout(() => {
+                    try {
+                        squelch.pause();
+                        squelch.currentTime = 0;
+                    } catch (e) {}
+                }, 350);
+            }
         }
 
         const utterance = new SpeechSynthesisUtterance(text);

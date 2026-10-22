@@ -169,6 +169,31 @@ class GameEngineClass {
     }
 
     /**
+     * Story & Lore Modal handlers
+     */
+    openStoryModal() {
+        const modal = document.getElementById("modal-story");
+        if (modal) modal.style.display = "flex";
+        if (window.MobileUX) window.MobileUX.vibrate(20);
+    }
+
+    closeStoryModal() {
+        const modal = document.getElementById("modal-story");
+        if (modal) modal.style.display = "none";
+    }
+
+    /**
+     * Read aloud a station's specific task instruction
+     */
+    speakStationTask(text) {
+        if (!window.AudioEngine) return;
+        AudioEngine.speakText(text, {
+            rate: 1.05,
+            pitch: this.faction === "west" ? 0.95 : 1.0
+        });
+    }
+
+    /**
      * Re-open Briefing Modal from inside terminal
      */
     openBriefingModal() {
@@ -286,7 +311,13 @@ class GameEngineClass {
         this.setFaction(factionKey);
         if (window.AudioEngine) {
             window.AudioEngine.init();
-            window.AudioEngine.play("assets/audio/radio_static.wav", 1.0, false);
+            // Subtle, soft static click (0.12 volume, short squelch)
+            const squelch = window.AudioEngine.play("assets/audio/radio_static.wav", 1.8, false, false, 0.12);
+            if (squelch) {
+                setTimeout(() => {
+                    try { squelch.pause(); squelch.currentTime = 0; } catch (e) {}
+                }, 350);
+            }
         }
 
         // Mobile UX: Keep screen awake during outdoor walking & request compass sensor
@@ -308,9 +339,10 @@ class GameEngineClass {
         const hudAgent = document.getElementById("hud-agent-name");
         if (hudAgent) hudAgent.textContent = this.playerName;
 
-        // Load Path into Map
+        // Load Path into Map & pre-render map
         if (window.MapEngine) {
             window.MapEngine.loadFactionPath(cfg.CHECKPOINTS);
+            window.MapEngine.onTabVisible();
         }
         if (window.GPSEngine) {
             window.GPSEngine.setPathWaypoints(cfg.CHECKPOINTS);
@@ -336,7 +368,7 @@ class GameEngineClass {
     }
 
     /**
-     * AKT 1: Start am Grenzpfad (0m)
+     * AKT 1: Start am Grenzpfad (0m) - "Klipp & Klar"
      */
     startAct1() {
         this.currentAct = 1;
@@ -348,7 +380,6 @@ class GameEngineClass {
         this.switchTab("terminal");
         this.addTerminalLog(`MISSION INITIALISIERT: ${MISSION_CONFIG.TITLE}`);
         this.addTerminalLog(`POSITION: ${cp.name} [50° 19.xxx]`);
-        this.addTerminalLog(`BEFEHL: Bewegen Sie sich zum Startpunkt und geben Sie die Grenz-Kennung ein.`);
 
         this.saveCurrentProgress();
         this.renderAct1UI();
@@ -356,17 +387,44 @@ class GameEngineClass {
 
     renderAct1UI() {
         const area = document.getElementById("terminal-mission-area");
+        const cp = (this.faction === "west" ? MISSION_CONFIG.WEST : MISSION_CONFIG.OST).CHECKPOINTS[0];
+
         area.innerHTML = `
-            <div class="act-card">
-                <div class="act-title">AKT 1: INITIALISIERUNG GRENZPOSTEN [0 METER]</div>
-                <div class="act-desc">
-                    Willkommen im Einsatzgebiet an der Grenze Bayern/Sachsen. Um das BND/MfS-Feldterminal mit der Leitstelle zu synchronisieren, geben Sie die 4-stellige Jahreszahl der Geheimoperation ein.
+            <div class="station-card">
+                <div class="station-badge-row">
+                    <span class="station-tag">STATION 1 VON 5</span>
+                    <span class="station-dist-pill">📍 ZIEL: <b id="act-live-dist">0 m</b></span>
                 </div>
-                <div class="terminal-action-row">
-                    <input type="text" id="input-act1-code" placeholder="4-stelliger Code..." class="terminal-input-field" maxlength="8" />
-                    <button id="btn-act1-submit" class="btn-terminal-action primary">BESTÄTIGEN</button>
+
+                <div class="station-title">${cp.name.toUpperCase()}</div>
+
+                <div class="station-nav-bar">
+                    <button class="btn-station-map" onclick="MapEngine.showStationOnMap(0)">
+                        🗺️ AUF DER KARTE ANZEIGEN
+                    </button>
                 </div>
-                <div class="act-hint">HINWEIS: Das Einsatzjahr des Schattentauschs (Herbst...).</div>
+
+                <div class="station-task-box">
+                    <div class="station-task-header">
+                        <span class="station-task-label">🔍 DEINE AUFGABE VOR ORT:</span>
+                        <button class="btn-station-tts" onclick="GameEngine.speakStationTask('Gehe zum ersten Grenzpfahl am befestigten Weg. Gib die vierstellige Jahreszahl der Operation ein!')">
+                            🔊 VORLESEN
+                        </button>
+                    </div>
+                    <div class="station-task-text">
+                        1. Begib dich zum <b>Startpunkt am befestigten Grenzweg</b>.<br>
+                        2. Finde die <b>4-stellige Jahreszahl</b> der Operation (Herbst 1983), um das Terminal zu entsperren.
+                    </div>
+                </div>
+
+                <div class="station-action-box">
+                    <label class="station-input-label" for="input-act1-code">⚡ CODE EINGEBEN:</label>
+                    <div class="station-input-row">
+                        <input type="text" id="input-act1-code" placeholder="4-stelliger Code..." class="station-code-input" maxlength="8" inputmode="numeric" />
+                        <button id="btn-act1-submit" class="btn-station-submit">BESTÄTIGEN ✓</button>
+                    </div>
+                    <div class="station-hint">💡 Tipp: Das Einsatzjahr des Schattentauschs (Herbst 1983).</div>
+                </div>
             </div>
         `;
 
@@ -377,7 +435,7 @@ class GameEngineClass {
                 this.showInGameModal("TERMINAL SYNCHRONISIERT", "Code korrekt! Verbindung zur Leitstelle hergestellt. Zielperson wird losgeschickt. Rücken Sie vor zu Checkpoint 2!", "VORRÜCKEN (AKT 2)");
                 this.startAct2();
             } else {
-                this.showInGameModal("ZUGRIFF VERWEIGERT", "Falsche Kennung! Überprüfen Sie Ihre Missionsunterlagen.", "ERNEUT VERSUCHEN");
+                this.showInGameModal("ZUGRIFF VERWEIGERT", "Falscher Code! Überprüfen Sie Ihre Missionsunterlagen.", "ERNEUT VERSUCHEN");
             }
         };
     }
@@ -397,13 +455,32 @@ class GameEngineClass {
 
         const area = document.getElementById("terminal-mission-area");
         area.innerHTML = `
-            <div class="act-card">
-                <div class="act-title">AKT 2: VORRÜCKEN & SICHTKONTAKT [45 METER]</div>
-                <div class="act-desc">
-                    Folgen Sie dem befestigten Grenzweg. Der Zielperson wurde das Vorrücksignal gegeben. Nähern Sie sich dem Übergabepunkt.
+            <div class="station-card">
+                <div class="station-badge-row">
+                    <span class="station-tag">STATION 2 VON 5</span>
+                    <span class="station-dist-pill">📍 ZIEL: <b id="act2-live-dist">-- m</b></span>
                 </div>
-                <div class="radar-status-live">
-                    DISTANZ ZUM NÄCHSTEN PUNKT: <span id="act2-live-dist" class="highlight">-- m</span>
+
+                <div class="station-title">${cp2.name.toUpperCase()}</div>
+
+                <div class="station-nav-bar">
+                    <button class="btn-station-map" onclick="MapEngine.showStationOnMap(1)">
+                        🗺️ AUF DER KARTE ANZEIGEN
+                    </button>
+                </div>
+
+                <div class="station-task-box">
+                    <div class="station-task-header">
+                        <span class="station-task-label">🔍 DEINE AUFGABE VOR ORT:</span>
+                        <button class="btn-station-tts" onclick="GameEngine.speakStationTask('Folge dem befestigten Grenzweg ca. 45 Meter bis zur Wegbiegung. Halte Ausschau nach der Zielperson!')">
+                            🔊 VORLESEN
+                        </button>
+                    </div>
+                    <div class="station-task-text">
+                        1. Folge dem <b>befestigten Grenzweg ca. 45 Meter</b> vorwärts.<br>
+                        2. Halte Sichtkontakt zur Demarkationslinie.<br>
+                        3. Bei Annäherung auf unter 10 Meter erfolgt die nächste Anweisung automatisch!
+                    </div>
                 </div>
             </div>
         `;
@@ -452,10 +529,39 @@ class GameEngineClass {
         const cpFallback = cfg.CHECKPOINTS[3];
         GPSEngine.setTarget(cpFallback.lat, cpFallback.lon);
 
-        this.addTerminalLog(`⚠️ ALARM: ZIELPERSON ANGESCHOSSEN! SOFORTIGER RÜCKZUG ZU PUNKT 4!`);
+        this.addTerminalLog(`⚠️ ALARM: ZIELPERSON ANGESCHOSSEN! RÜCKZUG ZU PUNKT 4!`);
         this.saveCurrentProgress();
 
-        StealthMinigame.start("terminal-mission-area", () => {
+        const area = document.getElementById("terminal-mission-area");
+        area.innerHTML = `
+            <div class="station-card" style="border-color: var(--alert-red);">
+                <div class="station-badge-row">
+                    <span class="station-tag" style="background: var(--alert-red); color: #fff;">⚠️ ALARM: BESCHUSS</span>
+                    <span class="station-dist-pill">📍 RÜCKZUG (35m ZURÜCK)</span>
+                </div>
+
+                <div class="station-title" style="color: var(--alert-red);">${cpFallback.name.toUpperCase()}</div>
+
+                <div class="station-nav-bar">
+                    <button class="btn-station-map" onclick="MapEngine.showStationOnMap(3)">
+                        🗺️ AUF DER KARTE ANZEIGEN
+                    </button>
+                </div>
+
+                <div class="station-task-box" style="border-left-color: var(--alert-red);">
+                    <div class="station-task-header">
+                        <span class="station-task-label" style="color: var(--alert-red);">🚨 DEINE AUFGABE:</span>
+                    </div>
+                    <div class="station-task-text">
+                        Die Zielperson wurde ins Bein getroffen! Weiche den Suchscheinwerfern aus und ziehe dich in die Deckungsmulde zurück.
+                    </div>
+                </div>
+
+                <div id="stealth-container"></div>
+            </div>
+        `;
+
+        StealthMinigame.start("stealth-container", () => {
             this.startAct3();
         });
     }
@@ -475,11 +581,33 @@ class GameEngineClass {
 
         const area = document.getElementById("terminal-mission-area");
         area.innerHTML = `
-            <div class="act-card">
-                <div class="act-title">AKT 3: NOTFALLVERSORGUNG & ABHÖRFUNK</div>
-                <div class="act-desc">
-                    Die Zielperson liegt mit Beinschuss im Schilf. Der Geigerzähler ortet den Wismut-Isotopen-Koffer.
+            <div class="station-card">
+                <div class="station-badge-row">
+                    <span class="station-tag">STATION 3 VON 5</span>
+                    <span class="station-dist-pill">📍 DECKUNGSERDWALL (60 METER)</span>
                 </div>
+
+                <div class="station-title">NOTFALLVERSORGUNG & FEINDFUNK</div>
+
+                <div class="station-nav-bar">
+                    <button class="btn-station-map" onclick="MapEngine.showStationOnMap(3)">
+                        🗺️ AUF DER KARTE ANZEIGEN
+                    </button>
+                </div>
+
+                <div class="station-task-box">
+                    <div class="station-task-header">
+                        <span class="station-task-label">🔍 DEINE AUFGABE VOR ORT:</span>
+                        <button class="btn-station-tts" onclick="GameEngine.speakStationTask('Stoppe die Blutung der Zielperson mit der Morsetaste im SOS Rhythmus!')">
+                            🔊 VORLESEN
+                        </button>
+                    </div>
+                    <div class="station-task-text">
+                        1. Die Zielperson liegt mit Beinschuss im Schilf.<br>
+                        2. <b>Stoppe die Blutung</b>, indem du die Taste im SOS-Rhythmus drückst (3x kurz, 3x lang, 3x kurz).
+                    </div>
+                </div>
+
                 <div id="triage-container"></div>
             </div>
         `;
@@ -495,11 +623,23 @@ class GameEngineClass {
         const targetFreq = this.faction === "west" ? MISSION_CONFIG.SOLUTIONS.RADIO_FREQ_WEST : MISSION_CONFIG.SOLUTIONS.RADIO_FREQ_OST;
 
         area.innerHTML = `
-            <div class="act-card">
-                <div class="act-title">FEINDFUNK & SOWJET-ABHÖRUNG (RADIO-TUNER)</div>
-                <div class="act-desc">
-                    Stellen Sie die Frequenz auf ${targetFreq} kHz (oder 474 kHz für den KGB-Sender) ein, um den abgefangenen Funkspruch zu entschlüsseln.
+            <div class="station-card">
+                <div class="station-badge-row">
+                    <span class="station-tag">STATION 3B</span>
+                    <span class="station-dist-pill">📻 FEINDFUNK ABHÖREN</span>
                 </div>
+
+                <div class="station-title">KURZWELLEN-TUNER ABSTIMMEN</div>
+
+                <div class="station-task-box">
+                    <div class="station-task-header">
+                        <span class="station-task-label">🔍 DEINE AUFGABE:</span>
+                    </div>
+                    <div class="station-task-text">
+                        Stelle die Frequenz auf <b>${targetFreq} kHz</b> (oder 474 kHz KGB-Kanal) ein, um den gegnerischen Funkspruch abzufangen!
+                    </div>
+                </div>
+
                 <div id="radio-container"></div>
             </div>
         `;
@@ -539,21 +679,33 @@ class GameEngineClass {
 
         const area = document.getElementById("terminal-mission-area");
         area.innerHTML = `
-            <div class="act-card">
-                <div class="act-title">AKT 4: DIE TAKTISCHE VERZWEIGUNG</div>
-                <div class="act-desc">
-                    Wie soll die Übergabe der verletzten Zielperson an der Demarkationslinie gerettet werden?
+            <div class="station-card">
+                <div class="station-badge-row">
+                    <span class="station-tag">STATION 4 VON 5</span>
+                    <span class="station-dist-pill">⚡ TAKTISCHE VERZWEIGUNG</span>
                 </div>
+
+                <div class="station-title">WÄHLE DEINEN FLUCHTPLAN</div>
+
+                <div class="station-task-box">
+                    <div class="station-task-header">
+                        <span class="station-task-label">🔍 DEINE ENTSCHEIDUNG:</span>
+                    </div>
+                    <div class="station-task-text">
+                        Wie soll die Übergabe der verletzten Zielperson gerettet werden?
+                    </div>
+                </div>
+
                 <div class="branch-choice-grid">
                     <button id="btn-branch-subtil" class="btn-branch-card">
                         <div class="branch-icon">🤫</div>
-                        <div class="branch-name">OPTION A: SUBTILE ÜBERGABE</div>
-                        <div class="branch-sub">Lautloser Austausch durch das alte Bachrohr im toten Winkel. Entschlüsselung über Morse-Flüsterer.</div>
+                        <div class="branch-name">OPTION A: SUBTIL</div>
+                        <div class="branch-sub">Lautloser Austausch durch das alte Bachrohr im toten Winkel.</div>
                     </button>
                     <button id="btn-branch-direkt" class="btn-branch-card">
                         <div class="branch-icon">💥</div>
-                        <div class="branch-name">OPTION B: DIREKTE ÜBERGABE</div>
-                        <div class="branch-sub">Nebelgranaten zünden & Sturm-Austausch unter tickendem 60-Sekunden-Countdown am Hauptgrenzstein!</div>
+                        <div class="branch-name">OPTION B: DIREKT</div>
+                        <div class="branch-sub">Nebelgranaten zünden & Sturm-Austausch unter 60-Sekunden-Countdown!</div>
                     </button>
                 </div>
             </div>
@@ -583,24 +735,45 @@ class GameEngineClass {
 
         const area = document.getElementById("terminal-mission-area");
         area.innerHTML = `
-            <div class="act-card">
-                <div class="act-title">AKT 5: FINALE & IDENTIFIZIERUNG DES SCHÜTZEN</div>
-                <div class="act-desc">
-                    ${this.branchChoice === 'direkt' ? '⏱️ ADRENALIN-MODUS AKTIV: 60 SEKUNDEN BIS ZUR ÜBERGABE!' : '🤫 LAUTLOSER SCHATTENTAUSCH IM GRENZGRABEN.'}
-                    Wer hat den Schuss auf die Zielperson abgefeuert? Nutzen Sie das Dossier und die Ballistik.
+            <div class="station-card">
+                <div class="station-badge-row">
+                    <span class="station-tag">STATION 5 VON 5 (FINALE)</span>
+                    <span class="station-dist-pill">📍 GRENZGRABEN</span>
                 </div>
+
+                <div class="station-title">ENTLARVUNG DES HECKENSCHÜTZEN</div>
+
+                <div class="station-nav-bar">
+                    <button class="btn-station-map" onclick="MapEngine.showStationOnMap(4)">
+                        🗺️ AUF DER KARTE ANZEIGEN
+                    </button>
+                </div>
+
+                <div class="station-task-box">
+                    <div class="station-task-header">
+                        <span class="station-task-label">🔍 DEINE AUFGABE VOR ORT:</span>
+                        <button class="btn-station-tts" onclick="GameEngine.speakStationTask('Gleiche die Akten im Dossier ab! Wer feuerte den Schuss auf die Zielperson?')">
+                            🔊 VORLESEN
+                        </button>
+                    </div>
+                    <div class="station-task-text">
+                        ${this.branchChoice === 'direkt' ? '⏱️ <b>ADRENALIN-MODUS:</b> 60 Sekunden bis zur Übergabe!' : '🤫 <b>LAUTLOSER SCHATTENTAUSCH:</b> Übergabe im toten Winkel.'}<br><br>
+                        Wer hat den Schuss auf die Zielperson abgefeuert? Nutze den Tab <b>📁 DOSSIERS</b> und wähle den Täter:
+                    </div>
+                </div>
+
                 <div class="mole-selection-grid">
                     <button class="btn-mole-opt" data-name="RICHTER">
-                        <b>HAUPTMANN RICHTER</b> (NVA Scharfschütze, Kaliber 7.62mm)
+                        <b>HAUPTMANN RICHTER</b><br><small>NVA Scharfschütze • Kaliber 7.62mm</small>
                     </button>
                     <button class="btn-mole-opt" data-name="BERGER">
-                        <b>UNTERLEUTNANT BERGER</b> (Funker Leitstelle)
+                        <b>UNTERLEUTNANT BERGER</b><br><small>Funker Leitstelle</small>
                     </button>
                     <button class="btn-mole-opt" data-name="ELSTER">
-                        <b>KLAUS-DIETER BEHRENDT</b> (Kundschafter)
+                        <b>KLAUS-DIETER BEHRENDT</b><br><small>Kundschafter DDR</small>
                     </button>
                 </div>
-                <div id="final-crypto-result" style="margin-top: 20px;"></div>
+                <div id="final-crypto-result" style="margin-top: 14px;"></div>
             </div>
         `;
 
@@ -763,6 +936,10 @@ class GameEngineClass {
         if (distEl && loc.dist !== null) {
             distEl.textContent = `${loc.dist} m`;
         }
+        const actDistEl = document.getElementById("act-live-dist");
+        if (actDistEl && loc.dist !== null) {
+            actDistEl.textContent = `${loc.dist} m`;
+        }
         const act2DistEl = document.getElementById("act2-live-dist");
         if (act2DistEl && loc.dist !== null) {
             act2DistEl.textContent = `${loc.dist} m`;
@@ -790,16 +967,34 @@ class GameEngineClass {
             const area = document.getElementById("terminal-mission-area");
             if (area) {
                 area.innerHTML = `
-                    <div class="act-card">
-                        <div class="act-title">AKT 2: WEGBIEGUNG PASSIERT • VORRÜCKEN ZU PUNKT 3 [85m]</div>
-                        <div class="act-desc">
-                            Sichtkontakt zur Zielperson im Schilf hergestellt! Bewegen Sie sich vorsichtig weiter zur Demarkationslinie (Punkt 3).
+                    <div class="station-card">
+                        <div class="station-badge-row">
+                            <span class="station-tag">STATION 2 • TEIL 2</span>
+                            <span class="station-dist-pill">📍 ZIEL: <b id="act2-live-dist">-- m</b></span>
                         </div>
-                        <div class="radar-status-live">
-                            DISTANZ ZUR ÜBERGABESTELLE: <span id="act2-live-dist" class="highlight">-- m</span>
+
+                        <div class="station-title">WEGBIEGUNG ERREICHT • VORRÜCKEN ZU PUNKT 3 (85m)</div>
+
+                        <div class="station-nav-bar">
+                            <button class="btn-station-map" onclick="MapEngine.showStationOnMap(2)">
+                                🗺️ AUF DER KARTE ANZEIGEN
+                            </button>
                         </div>
-                        <button class="btn-terminal-action primary" style="margin-top: 10px; width: 100%;" onclick="GameEngine.triggerIncident()">
-                            ⚡ AN ÜBERGABEPUNKT VORSTOSSEN (ZWISCHENFALL AUSLÖSEN)
+
+                        <div class="station-task-box">
+                            <div class="station-task-header">
+                                <span class="station-task-label">🔍 DEINE AUFGABE VOR ORT:</span>
+                                <button class="btn-station-tts" onclick="GameEngine.speakStationTask('Sichtkontakt zur Zielperson hergestellt! Bewege dich vorsichtig weiter zur Demarkationslinie.')">
+                                    🔊 VORLESEN
+                                </button>
+                            </div>
+                            <div class="station-task-text">
+                                Sichtkontakt zur Zielperson im Schilf hergestellt! Bewege dich vorsichtig weiter Richtung Demarkationslinie (Punkt 3).
+                            </div>
+                        </div>
+
+                        <button class="btn-station-submit" style="width: 100%; margin-top: 6px;" onclick="GameEngine.triggerIncident()">
+                            ⚡ AN ÜBERGABEPUNKT VORSTOSSEN ▶
                         </button>
                     </div>
                 `;

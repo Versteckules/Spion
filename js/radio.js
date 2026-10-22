@@ -85,8 +85,8 @@ class RadioTunerClass {
             if (this.onFreqUnlocked) this.onFreqUnlocked(this.currentFreq);
         };
 
-        // Start static noise
-        AudioEngine.startLoop("static", "assets/audio/radio_static.wav", 0.4);
+        // Start static noise (gentle atmospheric background, not loud)
+        AudioEngine.startLoop("static", "assets/audio/radio_static.wav", 0.08);
     }
 
     adjustFreq(delta) {
@@ -138,7 +138,7 @@ class RadioTunerClass {
         } else {
             status.innerHTML = `<span class="signal-indicator static">⚡ RAUSCHEN & STÖRFUNK (${freq} kHz)</span>`;
             actionBox.style.display = "none";
-            AudioEngine.startLoop("static", "assets/audio/radio_static.wav", 0.4);
+            AudioEngine.startLoop("static", "assets/audio/radio_static.wav", 0.08);
         }
     }
 

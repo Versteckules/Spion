@@ -43,7 +43,10 @@ class MapEngineClass {
      * Leaflet OSM initialization
      */
     initLeaflet(container) {
-        if (this.map) return;
+        if (this.map) {
+            try { this.map.invalidateSize(true); } catch (e) {}
+            return;
+        }
 
         // Center at border between Münchenreuth and Gutenfürst
         const center = [50.33100, 12.06940];
@@ -54,27 +57,22 @@ class MapEngineClass {
                 zoom: 16,
                 zoomControl: true,
                 attributionControl: false,
-                minZoom: 13,
+                minZoom: 12,
                 maxZoom: 19
             });
 
-            // Primary: High contrast dark carto tiles
-            const darkTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            // High-reliability OSM tiles with local military phosphor CSS filter
+            const tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
-                subdomains: 'abcd',
-                timeout: 5000
+                subdomains: 'abc',
+                timeout: 8000
             });
 
-            // Fallback: Standard OSM if Carto fails
-            darkTileLayer.on('tileerror', () => {
-                if (!this._hasSwitchedToOsm) {
-                    this._hasSwitchedToOsm = true;
-                    console.log("Carto Kacheln offline - nutze OSM Fallback");
-                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(this.map);
-                }
+            tileLayer.on('tileerror', () => {
+                console.warn("OSM Tile Ladefehler - Vektor-Modus steht bereit");
             });
 
-            darkTileLayer.addTo(this.map);
+            tileLayer.addTo(this.map);
 
             // Add custom styled border line (Demarkationslinie)
             const borderCoords = [
@@ -87,7 +85,7 @@ class MapEngineClass {
                 color: '#c93b3b',
                 weight: 4,
                 dashArray: '8, 6',
-                opacity: 0.9
+                opacity: 0.95
             }).addTo(this.map).bindTooltip("DEMARKATIONSLINIE (Grenzgraben)", { permanent: true, className: "border-tooltip" });
 
             // Add player marker
@@ -122,6 +120,9 @@ class MapEngineClass {
         toolbar.id = "tactical-map-toolbar";
         toolbar.className = "tactical-map-toolbar";
         toolbar.innerHTML = `
+            <button class="map-ctrl-btn return-btn" onclick="GameEngine.switchTab('terminal')" title="Zurück zur aktuellen Station">
+                📟 ZUR STATION
+            </button>
             <button class="map-ctrl-btn" onclick="MapEngine.recenterOnPlayer()" title="Auf eigene GPS-Position zentrieren">
                 🎯 STANDORT
             </button>
@@ -167,11 +168,11 @@ class MapEngineClass {
             });
             const marker = L.marker([cp.lat, cp.lon], { icon: cpIcon })
                 .addTo(this.map)
-                .bindPopup(`<div style="font-family:monospace; color:#111;"><b>Station ${idx + 1}: ${cp.name}</b><br>${cp.desc}</div>`);
+                .bindPopup(`<div style="font-family:monospace; color:#111; padding: 4px;"><b>Station ${idx + 1}: ${cp.name}</b><br>${cp.desc || 'Geheimtreffpunkt an der Demarkationslinie'}</div>`);
             this.checkpointMarkers.push(marker);
         });
 
-        // Safe bounds fitting: only if container is visible and has width > 0
+        // Safe bounds fitting
         const container = document.getElementById(this.containerId);
         if (container && container.offsetWidth > 0 && container.offsetHeight > 0) {
             try {
@@ -197,27 +198,52 @@ class MapEngineClass {
         }
 
         if (this.map) {
-            // Force Leaflet to recalculate container geometry
-            setTimeout(() => {
-                try {
-                    this.map.invalidateSize(true);
+            // Immediate resize attempt
+            try { this.map.invalidateSize(true); } catch (e) {}
 
-                    // If zoom is invalid (NaN) or not set, repair view
-                    const z = this.map.getZoom();
-                    if (isNaN(z) || z === undefined) {
-                        this.map.setView([this.lastLat, this.lastLon], 16);
-                    }
+            // Staggered resize attempts to guarantee tile rendering even during layout animations
+            [40, 120, 250, 500].forEach(delay => {
+                setTimeout(() => {
+                    try {
+                        this.map.invalidateSize(true);
 
-                    // Apply pending bounds fit if waiting for container display
-                    if (this.pendingFitBounds && this.pathLine) {
-                        this.map.fitBounds(this.pathLine.getBounds(), { padding: [35, 35], maxZoom: 17 });
-                        this.pendingFitBounds = false;
+                        const z = this.map.getZoom();
+                        if (isNaN(z) || z === undefined) {
+                            this.map.setView([this.lastLat, this.lastLon], 16);
+                        }
+
+                        if (this.pendingFitBounds && this.pathLine) {
+                            this.map.fitBounds(this.pathLine.getBounds(), { padding: [35, 35], maxZoom: 17 });
+                            this.pendingFitBounds = false;
+                        }
+                    } catch (err) {
+                        console.warn("Fehler bei map.invalidateSize:", err);
                     }
-                } catch (err) {
-                    console.warn("Fehler bei map.invalidateSize:", err);
-                }
-            }, 100);
+                }, delay);
+            });
         }
+    }
+
+    /**
+     * Jump directly to a station on the map
+     */
+    showStationOnMap(stationIndex) {
+        if (window.GameEngine) {
+            window.GameEngine.switchTab("map");
+        }
+        setTimeout(() => {
+            if (!this.map) return;
+            this.map.invalidateSize(true);
+            if (this.pendingCheckpoints && this.pendingCheckpoints[stationIndex]) {
+                const cp = this.pendingCheckpoints[stationIndex];
+                this.map.setView([cp.lat, cp.lon], 17, { animate: true });
+                if (this.checkpointMarkers && this.checkpointMarkers[stationIndex]) {
+                    this.checkpointMarkers[stationIndex].openPopup();
+                }
+            } else {
+                this.fitRoute();
+            }
+        }, 120);
     }
 
     /**

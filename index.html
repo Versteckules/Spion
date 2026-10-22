@@ -25,18 +25,17 @@
 <body class="theme-green">
 
     <!-- ======================================================================
-         1. COVER SCREEN (Startseite & 'Made by Versteckules')
+         1. COVER SCREEN (Startseite: Weniger ist mehr)
          ====================================================================== -->
     <div id="cover-screen" class="cover-fullscreen">
         <div class="cover-header-block">
             <div class="cover-cache-badge">STRENG GEHEIM • BND / MFS ARCHIV 1983</div>
             <h1 class="cover-main-title">OPERATION SCHATTENTAUSCH</h1>
-            <div class="cover-sub-title">DER ZWISCHENFALL AM GRENZGRABEN (BAYERN / SACHSEN)</div>
+            <div class="cover-sub-title">GEFANGENENAUSTAUSCH AM GRENZGRABEN (BAYERN / SACHSEN)</div>
             
-            <p class="cover-description">
-                Herbst 1983. Nebel über dem ehemaligen Grenzstreifen zwischen Bayern (Münchenreuth) und Sachsen (Gutenfürst). 
-                Ein geheimer Gefangenenaustausch zweier Spione soll vollzogen werden. Doch plötzlich peitscht ein Schuss durch das Niemandsland...
-            </p>
+            <button class="btn-story-preview" onclick="GameEngine.openStoryModal()">
+                📜 STORY & HINTERGRUND ANZEIGEN
+            </button>
         </div>
 
         <!-- Owner Branding: Schräges avatar.jpg & Made by Versteckules -->
@@ -61,7 +60,7 @@
                 <div id="agent-name-error" class="input-error-msg" style="display: none;">⚠️ Bitte zuerst einen Agentennamen eingeben!</div>
             </div>
 
-            <div class="faction-prompt-text">Wähle nun deine Einsatzseite:</div>
+            <div class="faction-prompt-text">Wähle deine Einsatzseite:</div>
 
             <!-- Faction Selection Buttons -->
             <div class="faction-select-area">
@@ -86,6 +85,25 @@
         <!-- Footer link to Owner Admin HQ -->
         <div class="cover-footer-bar">
             <a href="admin.html" class="owner-admin-link">⚙️ HQ ADMIN / FINAL-EDITOR</a>
+        </div>
+    </div>
+
+    <!-- Story & Hintergrund Modal -->
+    <div id="modal-story" class="tactical-modal-backdrop" style="display: none;">
+        <div class="tactical-modal-box">
+            <div class="modal-alert-header">
+                <span>📜</span> DER ZWISCHENFALL AM GRENZGRABEN (1983)
+            </div>
+            <div class="modal-alert-text">
+                Herbst 1983. Dichter Nebel liegt über dem Grenzstreifen zwischen Bayern (Münchenreuth) und Sachsen (Gutenfürst).<br><br>
+                Ein geheimer Gefangenenaustausch zweier Spione soll vollzogen werden. Doch plötzlich peitscht ein Schuss durch das Niemandsland!<br><br>
+                Wähle deine Einsatzseite, rücke auf dem befestigten Grenzweg vor, sichere die verwundete Zielperson und entlarve den Heckenschützen.
+            </div>
+            <div class="modal-alert-actions">
+                <button class="btn-terminal-action primary" onclick="GameEngine.closeStoryModal()">
+                    ✓ VERSTANDEN
+                </button>
+            </div>
         </div>
     </div>
 
@@ -214,6 +232,9 @@
                 <button id="btn-toggle-wakelock" class="quick-tool-btn" onclick="MobileUX.toggleWakeLock()" title="Bildschirm anlassen">
                     💡 DISPLAY: AUS
                 </button>
+                <button id="btn-hud-map-shortcut" class="quick-tool-btn" onclick="GameEngine.switchTab('map')" title="Direkt zur Live-Karte">
+                    🗺️ KARTE
+                </button>
                 <button id="btn-quick-replay" class="quick-tool-btn" onclick="AudioEngine.replayLast()" style="display: none;" title="Letzten Funkspruch wiederholen">
                     🔄 FUNK
                 </button>
@@ -234,30 +255,29 @@
         <!-- Main Tab Content Area -->
         <main class="tab-content-area">
 
-            <!-- TAB 1: TERMINAL -->
+            <!-- TAB 1: TERMINAL (Stationen & Aufgaben) -->
             <section id="tab-terminal" class="tab-view-panel active">
                 
-                <!-- Quick Re-open Briefing Button -->
-                <button class="btn-terminal-action secondary" style="margin-bottom: 8px; width: 100%; font-size: 11px; padding: 6px 10px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="GameEngine.openBriefingModal()">
-                    📋 EINSATZBEFEHL ANZEIGEN & VORLESEN
-                </button>
-
+                <!-- Dynamic Station Card rendered by GameEngine -->
                 <div id="terminal-mission-area">
-                    <!-- Dynamic Act UI loaded here by GameEngine -->
+                    <!-- Loaded dynamically: Station 1 to 5 with Zielort, Aufgabe & Code -->
                 </div>
 
-                <!-- Terminal System Logs -->
-                <div class="terminal-sys-log" id="terminal-sys-log">
-                    <div class="log-line"><span class="time">[INIT]</span> System betriebsbereit. Funkleitung gesichert.</div>
-                </div>
+                <!-- Collapsible System Log & Optional Command Console -->
+                <details class="terminal-log-drawer">
+                    <summary class="terminal-log-summary">
+                        <span>📟 SYSTEM-PROTOKOLL & STATUS</span>
+                        <span class="log-indicator">AKTIV</span>
+                    </summary>
+                    <div class="terminal-sys-log" id="terminal-sys-log">
+                        <div class="log-line"><span class="time">[INIT]</span> System betriebsbereit. Funkleitung gesichert.</div>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <input type="text" id="terminal-cmd-input" placeholder="Befehl oder Geheimcode eingeben..." class="terminal-input-field" style="margin-bottom: 0; flex: 1;" />
+                        <button id="btn-terminal-submit" class="btn-terminal-action" style="min-width: 48px; padding: 0 12px; font-size: 15px;" onclick="GameEngine.handleCommand(document.getElementById('terminal-cmd-input').value); document.getElementById('terminal-cmd-input').value='';">↵</button>
+                    </div>
+                </details>
 
-                <!-- Command Input Row (Ohne OFFLINETEST-Beispiel im Placeholder) -->
-                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <input type="text" id="terminal-cmd-input" placeholder="Befehl oder Stations-Code eingeben..." class="terminal-input-field" style="margin-bottom: 0; flex: 1;" />
-                    <button id="btn-terminal-submit" class="btn-terminal-action" style="min-width: 52px; padding: 0 14px; display: flex; align-items: center; justify-content: center; font-size: 16px;" onclick="GameEngine.handleCommand(document.getElementById('terminal-cmd-input').value); document.getElementById('terminal-cmd-input').value='';">
-                        ↵
-                    </button>
-                </div>
             </section>
 
             <!-- TAB 2: KARTE (Hybrid OpenStreetMap) -->

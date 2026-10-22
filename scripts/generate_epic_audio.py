@@ -72,9 +72,10 @@ def synth_morse(t, duration, sr):
 
 def synth_radio_static(t, duration, sr):
     import random
-    noise = (random.random() * 2 - 1) * 0.22
-    hum = 0.07 * math.sin(2 * math.pi * 50 * t)
-    whine = 0.03 * math.sin(2 * math.pi * 1150 * t)
+    # Soft, subtle background texture - never loud
+    noise = (random.random() * 2 - 1) * 0.06
+    hum = 0.02 * math.sin(2 * math.pi * 50 * t)
+    whine = 0.01 * math.sin(2 * math.pi * 1150 * t)
     return noise + hum + whine
 
 def main():

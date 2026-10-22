@@ -162,21 +162,34 @@ body::after {
 /* Tab Panels */
 .tab-content-area {
     flex: 1;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    width: 100%;
     position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding-bottom: 60px; /* space for bottom nav */
 }
 
 .tab-view-panel {
     display: none;
     width: 100%;
-    height: 100%;
-    padding: 14px;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 12px;
 }
 
 .tab-view-panel.active {
     display: flex;
     flex-direction: column;
+    flex: 1;
+}
+
+#tab-map.tab-view-panel {
+    padding: 0;
+    height: 100%;
+    min-height: 0;
 }
 
 /* Bottom Navigation Bar */
@@ -225,7 +238,255 @@ body.theme-amber .menu-tab-btn.active {
     background: rgba(255, 176, 0, 0.15);
 }
 
-/* Act Cards */
+/* ==========================================================================
+   Station Cards ("Klipp & Klar" Outdoor Design System)
+   ========================================================================== */
+.station-card {
+    background: rgba(14, 22, 14, 0.94);
+    border: 2px solid var(--text-primary);
+    border-radius: 4px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 12px var(--text-glow);
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+body.theme-amber .station-card {
+    background: rgba(26, 18, 8, 0.94);
+}
+
+.station-badge-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed var(--text-primary);
+    padding-bottom: 8px;
+    gap: 8px;
+}
+
+.station-tag {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    background: var(--text-primary);
+    color: #000;
+    padding: 3px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+}
+
+.station-dist-pill {
+    font-size: 13px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 8px var(--text-glow);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.station-title {
+    font-size: 17px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: var(--text-primary);
+    line-height: 1.25;
+}
+
+.station-nav-bar {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.btn-station-map {
+    flex: 1;
+    background: rgba(25, 45, 25, 0.85);
+    border: 1px solid var(--text-primary);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+    touch-action: manipulation;
+}
+
+body.theme-amber .btn-station-map {
+    background: rgba(45, 30, 15, 0.85);
+}
+
+.btn-station-map:hover, .btn-station-map:active {
+    background: var(--text-primary);
+    color: #000;
+    box-shadow: 0 0 10px var(--text-glow);
+}
+
+.station-task-box {
+    background: rgba(0, 0, 0, 0.7);
+    border-left: 4px solid var(--text-primary);
+    padding: 12px 14px;
+    border-radius: 0 4px 4px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.station-task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.station-task-label {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    color: #fff;
+}
+
+.btn-station-tts {
+    background: transparent;
+    border: 1px solid var(--text-primary);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+}
+
+.btn-station-tts:hover, .btn-station-tts.playing {
+    background: var(--text-primary);
+    color: #000;
+}
+
+.station-task-text {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #eee;
+}
+
+.station-task-text b {
+    color: var(--text-primary);
+}
+
+.station-action-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.station-input-label {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    opacity: 0.9;
+}
+
+.station-input-row {
+    display: flex;
+    gap: 8px;
+}
+
+.station-code-input {
+    flex: 1;
+    min-height: 48px;
+    background: #000;
+    border: 2px solid var(--text-primary);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: bold;
+    padding: 8px 14px;
+    border-radius: 3px;
+    outline: none;
+    letter-spacing: 2px;
+}
+
+.station-code-input:focus {
+    box-shadow: 0 0 12px var(--text-glow);
+}
+
+.btn-station-submit {
+    min-height: 48px;
+    padding: 0 20px;
+    background: var(--text-primary);
+    color: #000;
+    border: 2px solid var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    touch-action: manipulation;
+}
+
+.btn-station-submit:active {
+    transform: scale(0.97);
+}
+
+.station-hint {
+    font-size: 11px;
+    opacity: 0.75;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+/* Collapsible Log Drawer */
+.terminal-log-drawer {
+    margin-top: 10px;
+    background: rgba(5, 10, 5, 0.85);
+    border: 1px solid rgba(51, 255, 51, 0.4);
+    border-radius: 3px;
+    padding: 6px 10px;
+}
+
+body.theme-amber .terminal-log-drawer {
+    border-color: rgba(255, 176, 0, 0.4);
+}
+
+.terminal-log-summary {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-primary);
+    list-style: none;
+}
+
+.terminal-log-summary::-webkit-details-marker {
+    display: none;
+}
+
+.log-indicator {
+    font-size: 9px;
+    padding: 2px 6px;
+    background: rgba(51, 255, 51, 0.2);
+    border-radius: 2px;
+}
+
+/* Legacy Act Card Fallback */
 .act-card {
     background: rgba(16, 24, 16, 0.85);
     border: 1px solid var(--text-primary);
