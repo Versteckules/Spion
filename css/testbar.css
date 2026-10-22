@@ -55,6 +55,17 @@
     font-weight: bold;
 }
 
+.btn-test-wp.alert-wp {
+    border-color: #ff3333;
+    color: #ff9999;
+    background: #2a1111;
+}
+
+.btn-test-wp.alert-wp:hover, .btn-test-wp.alert-wp.active {
+    background: #ff3333;
+    color: #000;
+}
+
 .testbar-events {
     display: flex;
     gap: 6px;

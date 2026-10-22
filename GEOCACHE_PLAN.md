@@ -188,6 +188,97 @@ Jede Figur erhält ein eigens generiertes, farbiges Passfoto im Stil eines vergi
 
 ---
 
+### 4.5. Die interaktiven Minispiele & Aktions-Mechaniken im Detail
+
+Jede Station bietet ein handfestes, abwechslungsreiches Minispiel im authentischen Kalter-Krieg-Militärlook:
+
+1. **Station 1: Terminal-Entriegelung (Code 1983)**
+   * **Ziel:** Aktivierung des mobilen Einsatzkoffers durch Eingabe des Operationsjahres.
+   * **Mechanik:** Grünes / Bernsteinfarbenes Terminal-Tastenfeld.
+   * **Lösung:** `1983`.
+   * **Sofatest-Hilfe:** Direkter Button `[ ⚡ CODE '1983' EINFÜGEN & DIREKT WEITER ▶ ]` füllt das Feld aus und schaltet Station 2 frei.
+
+2. **Station 2: Vorrücken & Der Zwischenfall (Schusswechsel & Notruf)**
+   * **Ziel:** Vorrücken auf dem befestigten Grenzweg in Richtung Demarkationslinie (ca. 45–85m).
+   * **Mechanik:** GPS-Erkennung des Zielgebiets oder Sofatest-Button.
+   * **Der Zwischenfall:**
+     * Peitschender Schuss mit Grenzgraben-Hall (`gunshot_echo.wav`), Schrei des Verwundeten, Sirenen und bellende Grenzhunde (`sirens_dogs.wav`).
+     * **Telefon-Simulator (`phone.js`):** Bildschirm vibriert (`AudioEngine.vibrate`), ein Anruffenster mit grünem Hörer poppt auf.
+     * **West:** Aufgeregter bayerischer Notruf von Polizeihauptkommissar Xaver Huber (`incident_bavarian.mp3`, Hof).
+     * **Ost:** Tobender sächsischer Anruf von MfS-Oberstleutnant Ronny Schenk (`incident_saxon.mp3`, Karl-Marx-Stadt).
+     * Taste `[ 🔄 FUNKSPRUCH WIEDERHOLEN / REPLAY ]` erlaubt beliebiges Nachhören.
+   * **Trigger:** GPS-Eintritt (<10m) ODER Stations-Button `[ 💥 ZIELBEREICH ERREICHT • ZWISCHENFALL & SCHUSSWECHSEL AUSLÖSEN ▶ ]` ODER Testbar `[ 💥 3. Schuss & Notruf ]`.
+
+3. **Minispiel 1: Stealth-Radar & NVA-Suchscheinwerfer (`stealth.js`)**
+   * **Ziel:** Taktischer Rückzug im Zickzack, ohne von den rotierenden Scheinwerfern der Grenztürme erfasst zu werden.
+   * **Mechanik:** Kreisrundes Radar-Display im Phosphor-Look. Zwei Lichtkegel rotieren über das Suchfeld. Der Agent muss 15 Sekunden lang im toten Winkel bleiben bzw. rechtzeitig `[ IN DECKUNG GEHEN ]` drücken.
+   * **Strafe:** Bei Erfassung ertönt Flutlicht-Alarm und ein 45-Sekunden-Lockdown blockiert das Terminal.
+   * **Trigger:** Startet automatisch nach Beendigung des Notrufs ODER direkt über die Testbar `[ 🚨 Stealth-Radar ]`.
+
+4. **Minispiel 2: Triage-Biomonitor & Akustischer Morse-Code (`triage.js`)**
+   * **Ziel:** Stabilisierung der angeschossenen Zielperson (Dr. Manfred Görner / Klaus-Dieter Behrendt) in der Deckungsmulde.
+   * **Mechanik:**
+     * Vitaldaten-Monitor: Fallender Blutdruck (85/50 mmHg), kritische Herzfrequenz (`heartbeat_loop.wav`).
+     * Akustischer Notfallsender: Ein Morse-Piepton ertönt (`morse_beacon.wav`) im Rhythmus `... --- ...`.
+     * Terminal-Keypad: Eingabe des Morse-Codes `SOS` zum Entsperren des Verbandskastens und Bestätigung von `[ DRUCKVERBAND ANLEGEN ]`.
+   * **Sofatest-Hilfe:** Button `[ ⚡ CODE 'SOS' AUTOMATISCH EINGEBEN (TEST) ▶ ]` im Minispiel.
+   * **Trigger:** Erreichen von Station 3 ODER Testbar `[ ✚ 4. Triage (SOS) ]`.
+
+5. **Minispiel 3: Analoger Kurzwellen-Tuner & KGB-Funkspruch (`radio.js`)**
+   * **Ziel:** Abfangen des sowjetischen Funkspruchs aus Karlshorst durch genaues Abstimmen des Funkempfängers.
+   * **Mechanik:**
+     * Frequenzskala von 400 bis 520 kHz mit Schieberegler und grünem Oszilloskop.
+     * Weißes Rauschen (`radio_static.wav`), das leiser wird, je näher man der Zielfrequenz kommt.
+     * **Zielfrequenz:** `462 kHz` (West / BND) bzw. `480 kHz` (Ost / MfS).
+     * Bei exakter Abstimmung: Russischer Funkspruch von KGB-Major Igor Woronin (`kgb_woronin.mp3`) mit zuschaltbaren deutschen Untertiteln.
+   * **Sofatest-Hilfe:** Button `[ ⚡ ZIELFREQUENZ SOFORT EINSTELLEN (TEST) ▶ ]`.
+   * **Trigger:** Nach Triage ODER Testbar `[ 📻 Radio (KGB) ]`.
+
+6. **Station 4: Taktische Verzweigung (Entscheidungsspiel)**
+   * **Ziel:** Wahl der Flucht- und Übergaberoute unter Zeitdruck.
+   * **Option A (Subtil):** Kriechen durch das alte Bachrohr im toten Winkel des Schießplatzes.
+   * **Option B (Direkt / Sturm):** Einsatz von Nebel- und Blendgranaten mit 60-Sekunden-Countdown.
+   * **Restlichtverstärker (NVG):** Umschalten auf Nachtsicht-Modus (`nvg.css`) mit grünem Phosphor-Filter zum Entziffern fluoreszierender UV-Kreidemarkierungen.
+   * **Trigger:** Erreichen von Station 4 ODER Testbar `[ ⚡ 5. Fluchtplan ]`.
+
+7. **Station 5: Das Krypto-Finale & Maulwurf-Entlarvung**
+   * **Ziel:** Identifikation des Schützen und Entschlüsselung der Koordinaten des physischen Caches.
+   * **Mechanik:**
+     * **Dossier-Abgleich:** Die 7 Polaroid-Dossiers werden nach Schusswinkel, Waffenkaliber und Dienstzeiten analysiert. Ergebnis: **Hauptmann Wolfgang Richter**.
+     * **Kryptografische Entschlüsselung:** Echte militärische AES-256-GCM Entschlüsselung via Web Crypto API im Terminal.
+     * **Ergebnis:** Ausgabe der exakten Geocache-Final-Koordinaten für Dose West (Bayern) bzw. Dose Ost (Sachsen).
+   * **Trigger:** Erreichen von Station 5 ODER Testbar `[ 🎯 6. Finale (Safe) ]`.
+
+---
+
+### 4.6. Sofatest & 1-Klick-Direktsteuerung (Warum vorher nichts passierte & wie es jetzt funktioniert)
+
+#### Warum schien es vorher so, als passiere nichts?
+1. **Fehlende Vibrations-Methode:** Im Telefon-Simulator und den Minispielen wurde `AudioEngine.vibrate()` aufgerufen. Da diese Funktion fehlte, brach JavaScript mit einem stillen `TypeError` ab, bevor das Anruffenster mit Xaver/Schenk angezeigt werden konnte. (Behoben in Version 8!)
+2. **GPS-Wartezustand im Wohnzimmer:** Die Stationen warteten auf eine reale Annäherung auf unter 10 Meter an die Grenzkoordinaten. Wer am Schreibtisch saß, blieb in Station 1 bzw. 2 hängen.
+3. **Frühere Testbar simulierte nur GPS-Zahlen:** Die alten `P1`–`P5`-Buttons änderten nur die Breitengrade, lösten aber keine Aktionsübergänge aus.
+
+#### Wie man jetzt jedes Minispiel sofort mit 1 Klick ausprobiert:
+* **Option 1 (Die neue Testbar am oberen Bildschirmrand):**
+  * Klick auf `[ 🛠️ OFFLINE-TESTMODUS ]` auf dem Startbildschirm (oder Codename `OFFLINETEST`).
+  * In der Leiste oben sind jetzt dedizierte **Direkt-Aktions-Buttons**:
+    * `[ 🔘 1. Start (1983) ]` – Startet Station 1 und füllt 1983 ein.
+    * `[ 📍 2. Vorrücken ]` – Schaltet auf Station 2.
+    * `[ 💥 3. Schuss & Notruf ]` – Löst sofort den Schusswechsel und den Telefonanruf aus!
+    * `[ 🚨 Stealth-Radar ]` – Öffnet direkt das Suchscheinwerfer-Radar.
+    * `[ ✚ 4. Triage (SOS) ]` – Öffnet direkt den Triage-Biomonitor mit SOS-Code.
+    * `[ 📻 Radio (KGB) ]` – Öffnet direkt den analogen Kurzwellen-Tuner.
+    * `[ ⚡ 5. Fluchtplan ]` – Öffnet die taktische Verzweigung (Subtil vs. Sturm).
+    * `[ 🎯 6. Finale (Safe) ]` – Öffnet das Krypto-Finale mit Safe-Entschlüsselung.
+* **Option 2 (Direkt im Stations-Terminal):**
+  * An jeder Station gibt es nun auffällige gelbe Schnell-Aktions-Buttons:
+    * Station 1: `[ ⚡ CODE '1983' EINFÜGEN & DIREKT WEITER ▶ ]`
+    * Station 2: `[ 💥 ZIELBEREICH ERREICHT • ZWISCHENFALL & SCHUSSWECHSEL AUSLÖSEN ▶ ]`
+    * Station 3: `[ ⚡ CODE 'SOS' AUTOMATISCH EINGEBEN (TEST) ▶ ]`
+    * Station 3b: `[ ⚡ ZIELFREQUENZ SOFORT EINSTELLEN (TEST) ▶ ]`
+
+---
+
 ### 5. Audio- & Call-Erlebnis
 
 * **Deftigste Dialekt-Sprachaufnahmen (+35% Sprechtempo):**

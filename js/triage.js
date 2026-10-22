@@ -69,6 +69,9 @@ class TriageMinigameClass {
                     <button id="btn-submit-triage" class="btn-terminal-action primary" style="margin-top: 15px; width: 100%;">
                         💉 DRUCKVERBAND ANLEGEN & STABILISIEREN
                     </button>
+                    <button type="button" id="btn-quick-triage" class="btn-station-autofill" onclick="TriageMinigame.quickSolve()">
+                        ⚡ CODE 'SOS' AUTOMATISCH EINGEBEN (TEST) ▶
+                    </button>
                 </div>
 
                 <div class="triage-feedback" id="triage-feedback"></div>
@@ -101,6 +104,13 @@ class TriageMinigameClass {
         document.getElementById("btn-submit-triage").onclick = () => {
             this.verify();
         };
+    }
+
+    quickSolve() {
+        this.currentInput = "SOS";
+        const display = document.getElementById("triage-code-display");
+        if (display) display.textContent = "SOS";
+        this.verify();
     }
 
     verify() {

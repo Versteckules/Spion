@@ -58,6 +58,9 @@ class RadioTunerClass {
                         <span class="freq-step-hint">FEINABSTIMMUNG</span>
                         <button type="button" id="btn-freq-plus" class="btn-freq-step" onclick="RadioTuner.adjustFreq(+1)">+1 kHz ▶</button>
                     </div>
+                    <button type="button" class="btn-station-autofill" onclick="RadioTuner.quickTune()">
+                        ⚡ ZIELFREQUENZ (${this.targetFreq} kHz) SOFORT EINSTELLEN (TEST) ▶
+                    </button>
                 </div>
 
                 <div class="radio-status" id="radio-signal-status">
@@ -95,6 +98,15 @@ class RadioTunerClass {
         if (slider) slider.value = next;
         if (window.MobileUX) window.MobileUX.vibrate(15);
         this.setFrequency(next);
+    }
+
+    quickTune() {
+        const slider = document.getElementById("freq-slider");
+        if (slider) slider.value = this.targetFreq;
+        this.setFrequency(this.targetFreq);
+        setTimeout(() => {
+            if (this.onFreqUnlocked) this.onFreqUnlocked(this.targetFreq);
+        }, 600);
     }
 
     setFrequency(freq) {

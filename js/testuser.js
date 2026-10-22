@@ -1,8 +1,8 @@
 /**
  * Testuser-Modul für Geocache "Operation Schattentausch"
  * - Freigeschaltet durch Eingabe von 'OFFLINETEST', 'TEST' oder 1-Klick-Button
- * - Blendet eine Simulations-Leiste am oberen Bildschirmrand ein
- * - Erlaubt 1-Klick-Sofa-Tests aller Wegpunkte, Schusswechsel, Minispiele und Krypto-Funktionen
+ * - Blendet eine interaktive Simulations-Leiste am oberen Bildschirmrand ein
+ * - Erlaubt 1-Klick-Sofa-Tests aller Wegpunkte, Minispiele (Stealth, Triage, Radio, Anrufe) und Krypto-Funktionen
  */
 
 class TestUserSimulatorClass {
@@ -88,8 +88,8 @@ class TestUserSimulatorClass {
         if (window.GameEngine && window.GameEngine.showInGameModal) {
             window.GameEngine.showInGameModal(
                 "TESTUSER FREIGESCHALTET",
-                "Der OFFLINETEST-Modus ist aktiv! Sie können nun über die Steuerleiste am oberen Bildschirmrand jeden Wegpunkt simulieren und alle Stationen ohne GPS durchspielen.",
-                "VERSTANDEN"
+                "Der OFFLINETEST-Modus ist aktiv! Klicke in der oberen Leiste auf ein beliebiges Minispiel (💥 Schuss, 🚨 Stealth, ✚ Triage, 📻 Radio, 🎯 Finale), um es sofort auf dem Bildschirm zu starten.",
+                "SPIELE TESTEN ▶"
             );
         }
     }
@@ -107,17 +107,34 @@ class TestUserSimulatorClass {
         const faction = window.CurrentFaction || (window.GameEngine ? window.GameEngine.faction : "west");
         const checkpoints = faction === "west" ? MISSION_CONFIG.WEST.CHECKPOINTS : MISSION_CONFIG.OST.CHECKPOINTS;
 
-        let buttonsHtml = checkpoints.map((cp, idx) => `
-            <button class="btn-test-wp" data-lat="${cp.lat}" data-lon="${cp.lon}" data-idx="${idx}" title="${cp.name}">
-                ${idx === 2 ? '💥' : (idx === 3 ? '↩️' : (idx === 4 ? '📍' : '🔘'))} P${idx + 1}: ${cp.name.split(' ')[0]}
-            </button>
-        `).join("");
-
         this.barElement.innerHTML = `
             <div class="testbar-inner">
-                <span class="testbar-label">🛠️ OFFLINETEST [${faction.toUpperCase()}]:</span>
+                <span class="testbar-label">🛠️ OFFLINE-TEST [${faction.toUpperCase()}]:</span>
                 <div class="testbar-buttons">
-                    ${buttonsHtml}
+                    <button class="btn-test-wp" data-action="act1" title="Station 1: Startpunkt & Code">
+                        🔘 1. Start (1983)
+                    </button>
+                    <button class="btn-test-wp" data-action="act2" title="Station 2: Vorrücken (45m)">
+                        📍 2. Vorrücken
+                    </button>
+                    <button class="btn-test-wp alert-wp" data-action="incident" title="Station 2.5: Schusswechsel & Dialekt-Notruf">
+                        💥 3. Schuss & Notruf
+                    </button>
+                    <button class="btn-test-wp" data-action="stealth" title="Stealth: Suchscheinwerfer & NVA Radar">
+                        🚨 Stealth-Radar
+                    </button>
+                    <button class="btn-test-wp" data-action="triage" title="Station 3: Triage-Lazarett & SOS Morsecode">
+                        ✚ 4. Triage (SOS)
+                    </button>
+                    <button class="btn-test-wp" data-action="radio" title="Station 3b: Kurzwellen-Radio & KGB-Abhörung">
+                        📻 Radio (KGB)
+                    </button>
+                    <button class="btn-test-wp" data-action="branch" title="Station 4: Fluchtplan-Wahl (Subtil vs. Direkt)">
+                        ⚡ 5. Fluchtplan
+                    </button>
+                    <button class="btn-test-wp" data-action="final" title="Station 5: Finale, Heckenschütze & Krypto-Safe">
+                        🎯 6. Finale (Safe)
+                    </button>
                 </div>
                 <div class="testbar-events">
                     <button id="btn-test-patrol" class="btn-test-ev" title="Patrouille triggern">🚨 Streife</button>
@@ -126,19 +143,56 @@ class TestUserSimulatorClass {
             </div>
         `;
 
-        // Bind waypoint buttons
+        // Bind interactive direct-jump buttons
         this.barElement.querySelectorAll(".btn-test-wp").forEach(btn => {
             btn.onclick = () => {
-                const lat = parseFloat(btn.dataset.lat);
-                const lon = parseFloat(btn.dataset.lon);
-                if (window.GPSEngine) {
-                    window.GPSEngine.simulateLocation(lat, lon, 2.5);
-                }
-                if (window.MapEngine) {
-                    window.MapEngine.updatePlayerPosition(lat, lon);
-                }
+                const action = btn.dataset.action;
                 btn.classList.add("active");
-                setTimeout(() => btn.classList.remove("active"), 1200);
+                setTimeout(() => btn.classList.remove("active"), 800);
+
+                if (!window.GameEngine) return;
+                window.GameEngine.switchTab("terminal");
+
+                const currentCheckpoints = (window.GameEngine.faction === "west" ? MISSION_CONFIG.WEST : MISSION_CONFIG.OST).CHECKPOINTS;
+
+                if (action === "act1") {
+                    const cp = currentCheckpoints[0];
+                    if (window.GPSEngine) window.GPSEngine.simulateLocation(cp.lat, cp.lon, 2.5);
+                    if (window.MapEngine) window.MapEngine.updatePlayerPosition(cp.lat, cp.lon);
+                    window.GameEngine.startAct1();
+                    const codeIn = document.getElementById("input-act1-code");
+                    if (codeIn) codeIn.value = "1983";
+                } else if (action === "act2") {
+                    const cp = currentCheckpoints[1];
+                    if (window.GPSEngine) window.GPSEngine.simulateLocation(cp.lat, cp.lon, 2.5);
+                    if (window.MapEngine) window.MapEngine.updatePlayerPosition(cp.lat, cp.lon);
+                    window.GameEngine.startAct2();
+                } else if (action === "incident") {
+                    const cp = currentCheckpoints[2];
+                    if (window.GPSEngine) window.GPSEngine.simulateLocation(cp.lat, cp.lon, 2.5);
+                    if (window.MapEngine) window.MapEngine.updatePlayerPosition(cp.lat, cp.lon);
+                    window.GameEngine.triggerIncident();
+                } else if (action === "stealth") {
+                    const cp = currentCheckpoints[3];
+                    if (window.GPSEngine) window.GPSEngine.simulateLocation(cp.lat, cp.lon, 2.5);
+                    if (window.MapEngine) window.MapEngine.updatePlayerPosition(cp.lat, cp.lon);
+                    window.GameEngine.startFallbackStealth();
+                } else if (action === "triage") {
+                    const cp = currentCheckpoints[3];
+                    if (window.GPSEngine) window.GPSEngine.simulateLocation(cp.lat, cp.lon, 2.5);
+                    if (window.MapEngine) window.MapEngine.updatePlayerPosition(cp.lat, cp.lon);
+                    window.GameEngine.startAct3();
+                } else if (action === "radio") {
+                    window.GameEngine.startRadioPhase();
+                } else if (action === "branch") {
+                    window.GameEngine.startAct4();
+                } else if (action === "final") {
+                    const cp = currentCheckpoints[4];
+                    if (window.GPSEngine) window.GPSEngine.simulateLocation(cp.lat, cp.lon, 2.5);
+                    if (window.MapEngine) window.MapEngine.updatePlayerPosition(cp.lat, cp.lon);
+                    window.GameEngine.branchChoice = window.GameEngine.branchChoice || "subtil";
+                    window.GameEngine.startAct5();
+                }
             };
         });
 

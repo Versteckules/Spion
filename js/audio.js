@@ -86,11 +86,24 @@ class AudioEngineClass {
      */
     replayLast() {
         if (this.lastPlayedFile) {
-            if (window.MobileUX) window.MobileUX.vibrate(25);
+            this.vibrate(25);
             this.play(this.lastPlayedFile, this.lastPlayedSpeed, true);
             return true;
         }
         return false;
+    }
+
+    /**
+     * Haptic feedback vibration (delegates to MobileUX or navigator.vibrate)
+     */
+    vibrate(pattern = 50) {
+        try {
+            if (window.MobileUX && typeof window.MobileUX.vibrate === "function") {
+                window.MobileUX.vibrate(pattern);
+            } else if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+                navigator.vibrate(pattern);
+            }
+        } catch(e) {}
     }
 
     /**

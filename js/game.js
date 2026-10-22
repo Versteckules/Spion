@@ -444,6 +444,9 @@ class GameEngineClass {
                         <button id="btn-act1-submit" class="btn-station-submit">BESTÄTIGEN ✓</button>
                     </div>
                     <div class="station-hint">💡 Tipp: Das Einsatzjahr des Schattentauschs (Herbst 1983).</div>
+                    <button type="button" class="btn-station-autofill" onclick="document.getElementById('input-act1-code').value='1983'; document.getElementById('btn-act1-submit').click();">
+                        ⚡ CODE '1983' EINFÜGEN & DIREKT WEITER ▶
+                    </button>
                 </div>
             </div>
         `;
@@ -499,9 +502,13 @@ class GameEngineClass {
                     <div class="station-task-text">
                         1. Folge dem <b>befestigten Grenzweg ca. 45 Meter</b> vorwärts.<br>
                         2. Halte Sichtkontakt zur Demarkationslinie.<br>
-                        3. Bei Annäherung auf unter 10 Meter erfolgt die nächste Anweisung automatisch!
+                        3. Bei Annäherung auf unter 10m (oder Klick unten) bricht der Zwischenfall los!
                     </div>
                 </div>
+
+                <button class="btn-station-submit" style="width: 100%; margin-top: 14px; font-size: 13px;" onclick="GameEngine.triggerIncident()">
+                    💥 ZIELBEREICH ERREICHT • ZWISCHENFALL & SCHUSSWECHSEL AUSLÖSEN ▶
+                </button>
             </div>
         `;
     }
