@@ -9,18 +9,18 @@
     <link rel="manifest" href="manifest.json">
 
     <!-- Leaflet CSS for Map (Local first, CDN fallback) -->
-    <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="css/leaflet.css?v=7">
 
-    <!-- Custom Retro & Military CSS Stylesheets -->
-    <link rel="stylesheet" href="css/terminal.css">
-    <link rel="stylesheet" href="css/cover.css">
-    <link rel="stylesheet" href="css/map.css">
-    <link rel="stylesheet" href="css/radar.css">
-    <link rel="stylesheet" href="css/dossier.css">
-    <link rel="stylesheet" href="css/nvg.css">
-    <link rel="stylesheet" href="css/geiger.css">
-    <link rel="stylesheet" href="css/testbar.css">
-    <link rel="stylesheet" href="css/mobile.css">
+    <!-- Custom Retro & Military CSS Stylesheets (v7 Cache Buster) -->
+    <link rel="stylesheet" href="css/terminal.css?v=7">
+    <link rel="stylesheet" href="css/cover.css?v=7">
+    <link rel="stylesheet" href="css/map.css?v=7">
+    <link rel="stylesheet" href="css/radar.css?v=7">
+    <link rel="stylesheet" href="css/dossier.css?v=7">
+    <link rel="stylesheet" href="css/nvg.css?v=7">
+    <link rel="stylesheet" href="css/geiger.css?v=7">
+    <link rel="stylesheet" href="css/testbar.css?v=7">
+    <link rel="stylesheet" href="css/mobile.css?v=7">
 </head>
 <body class="theme-green">
 
@@ -60,7 +60,7 @@
                 <div id="agent-name-error" class="input-error-msg" style="display: none;">⚠️ Bitte zuerst einen Agentennamen eingeben!</div>
             </div>
 
-            <div class="faction-prompt-text">Wähle deine Einsatzseite:</div>
+            <div class="faction-prompt-text">Wähle deine Einsatzseite (Startet die Mission sofort):</div>
 
             <!-- Faction Selection Buttons -->
             <div class="faction-select-area">
@@ -80,11 +80,22 @@
                     </div>
                 </button>
             </div>
+
+            <!-- Quick Action Buttons: Einsatzkarte & Offline-Testmodus -->
+            <div class="cover-quick-actions-row">
+                <button type="button" class="btn-cover-action" onclick="GameEngine.previewMapOnCover()">
+                    🗺️ EINSATZKARTE ANSEHEN
+                </button>
+                <button type="button" class="btn-cover-action test" onclick="TestUserSimulator.activate()">
+                    🛠️ OFFLINE-TESTMODUS
+                </button>
+            </div>
         </div>
 
-        <!-- Footer link to Owner Admin HQ -->
+        <!-- Footer link to Owner Admin HQ & Cache Reset -->
         <div class="cover-footer-bar">
             <a href="admin.html" class="owner-admin-link">⚙️ HQ ADMIN / FINAL-EDITOR</a>
+            <button type="button" class="btn-clear-cache-footer" onclick="GameEngine.clearCacheAndReload()">🔄 AKTUALISIEREN / CACHE LEEREN</button>
         </div>
     </div>
 
@@ -108,7 +119,7 @@
     </div>
 
     <!-- ======================================================================
-         1.5. MISSION BRIEFING MODAL (Visuelles Intro mit Bildern & Vorlesen)
+         1.5. MISSION BRIEFING MODAL (Kompakt & Direkt ohne Textwüsten)
          ====================================================================== -->
     <div id="mission-briefing-modal" class="tactical-modal-backdrop" style="display: none;">
         <div class="briefing-modal-card">
@@ -118,7 +129,7 @@
                 <span class="briefing-agent-tag">Agent <b id="briefing-agent-display">Agent</b></span>
             </div>
 
-            <!-- Commander Portrait & Audio Pitch -->
+            <!-- Commander Portrait & Info -->
             <div class="briefing-leader-row">
                 <div class="briefing-polaroid-frame">
                     <img id="briefing-leader-img" src="assets/img/person_xaver.png" alt="Einsatzleiter" class="briefing-polaroid-img" />
@@ -130,31 +141,8 @@
                 </div>
             </div>
 
-            <!-- 3 Clear Action Steps (Was ist zu tun?) -->
-            <div class="briefing-steps-list">
-                <div class="briefing-step-box">
-                    <div class="briefing-step-icon">🚶</div>
-                    <div class="briefing-step-content">
-                        <div class="briefing-step-title">1. MARSCHIEREN & ORTEN</div>
-                        <div class="briefing-step-desc">Folge dem Peilkompass und der Meter-Anzeige zu Station 1 am befestigten Grenzweg.</div>
-                    </div>
-                </div>
-
-                <div class="briefing-step-box">
-                    <div class="briefing-step-icon">🔍</div>
-                    <div class="briefing-step-content">
-                        <div class="briefing-step-title">2. ERMITTELN & EINGEBEN</div>
-                        <div class="briefing-step-desc">Suche vor Ort nach geheimen Hinweisen und gib gefundene Codes im Terminal ein.</div>
-                    </div>
-                </div>
-
-                <div class="briefing-step-box">
-                    <div class="briefing-step-icon">🎧</div>
-                    <div class="briefing-step-content">
-                        <div class="briefing-step-title">3. FUNK BEACHTEN</div>
-                        <div class="briefing-step-desc">Halte dein Audio laut! Bei Zwischenfällen schlägt dein Funkgerät Alarm.</div>
-                    </div>
-                </div>
+            <div style="background: rgba(0,0,0,0.6); border-left: 3px solid var(--text-primary); padding: 8px 12px; font-size: 13px; color: #fff;">
+                🎯 <b>Missionsbefehl:</b> Sofortiges Vorrücken auf dem befestigten Grenzweg zu Station 1. Vor Ort Geheimcode ermitteln und im Terminal eingeben.
             </div>
 
             <!-- Read Aloud / Vorlese-Audio Player -->
@@ -167,7 +155,7 @@
                 <div class="audio-wave-anim" id="briefing-audio-wave">
                     <span></span><span></span><span></span><span></span>
                 </div>
-                <div class="briefing-audio-label">Echtzeit-Sprachausgabe</div>
+                <div class="briefing-audio-label">Echtzeit-Sprachausgabe (+20% Tempo)</div>
             </div>
 
             <!-- Action Button: Start Game -->
@@ -347,30 +335,33 @@
     </div>
 
     <!-- Leaflet JS (Local first, with fallback) -->
-    <script src="js/leaflet.js"></script>
+    <script src="js/leaflet.js?v=7"></script>
 
-    <!-- Custom Modules -->
-    <script src="js/config.js"></script>
-    <script src="js/crypto.js"></script>
-    <script src="js/audio.js"></script>
-    <script src="js/gps.js"></script>
-    <script src="js/map.js"></script>
-    <script src="js/geiger.js"></script>
-    <script src="js/phone.js"></script>
-    <script src="js/radio.js"></script>
-    <script src="js/stealth.js"></script>
-    <script src="js/triage.js"></script>
-    <script src="js/testuser.js"></script>
-    <script src="js/events.js"></script>
-    <script src="js/mobile.js"></script>
-    <script src="js/game.js"></script>
+    <!-- Custom Modules (v7 Cache Buster) -->
+    <script src="js/config.js?v=7"></script>
+    <script src="js/crypto.js?v=7"></script>
+    <script src="js/audio.js?v=7"></script>
+    <script src="js/gps.js?v=7"></script>
+    <script src="js/map.js?v=7"></script>
+    <script src="js/geiger.js?v=7"></script>
+    <script src="js/phone.js?v=7"></script>
+    <script src="js/radio.js?v=7"></script>
+    <script src="js/stealth.js?v=7"></script>
+    <script src="js/triage.js?v=7"></script>
+    <script src="js/testuser.js?v=7"></script>
+    <script src="js/events.js?v=7"></script>
+    <script src="js/mobile.js?v=7"></script>
+    <script src="js/game.js?v=7"></script>
 
-    <!-- Service Worker Registration for Offline Capability -->
+    <!-- Service Worker Registration with Auto-Update -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
-                    .then(reg => console.log('ServiceWorker registriert:', reg.scope))
+                    .then(reg => {
+                        console.log('ServiceWorker registriert:', reg.scope);
+                        reg.update(); // Trigger immediate update check for fresh files
+                    })
                     .catch(err => console.log('ServiceWorker Fehler:', err));
             });
         }

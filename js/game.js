@@ -108,33 +108,102 @@ class GameEngineClass {
     }
 
     /**
-     * Agent Name Check & Open Visual Mission Briefing
+     * Agent Selection & Direct Mission Start (Weniger ist mehr)
      */
     handleFactionSelection(factionKey) {
         const input = document.getElementById("agent-callsign-input");
-        const name = input ? input.value.trim() : "";
-        const err = document.getElementById("agent-name-error");
+        let name = input ? input.value.trim() : "";
 
-        if (!name) {
-            if (input) input.classList.add("input-error");
-            if (err) err.style.display = "block";
-            if (window.MobileUX) window.MobileUX.vibrate([80, 40, 80]);
-            if (input) input.focus();
-            return;
+        // Check for OFFLINETEST trigger in callsign
+        if (name.toUpperCase().includes("OFFLINETEST") || name.toUpperCase() === "TEST" || name.toUpperCase() === "SOFA") {
+            if (window.TestUserSimulator) {
+                window.TestUserSimulator.activate();
+            }
         }
 
-        if (input) input.classList.remove("input-error");
-        if (err) err.style.display = "none";
+        // Default name if left empty - never block with an error message
+        if (!name) {
+            name = factionKey === "west" ? "Agent-07" : "Genosse-Falke";
+            if (input) input.value = name;
+        }
 
         this.playerName = name;
         this.faction = factionKey;
         localStorage.setItem("spion_agent_name", name);
 
-        this.openMissionBriefing(factionKey);
+        // DIRECT START: Jump directly into Act 1 at Station 1 with clear, action-oriented instructions
+        this.startConfirmedMission();
     }
 
     /**
-     * Open Briefing Overlay Modal with officer portrait and speech setup
+     * Preview map directly from cover screen
+     */
+    previewMapOnCover() {
+        const input = document.getElementById("agent-callsign-input");
+        let name = input ? input.value.trim() : "";
+        if (!name) name = "Agent";
+        this.playerName = name;
+        this.faction = this.faction || "west";
+        this.startConfirmedMission();
+        this.switchTab("map");
+    }
+
+    /**
+     * Clear all service worker caches & reload fresh version
+     */
+    clearCacheAndReload() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(regs => {
+                for (let reg of regs) reg.unregister();
+            });
+        }
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                for (let name of names) caches.delete(name);
+            });
+        }
+        try {
+            localStorage.clear();
+            sessionStorage.clear();
+        } catch(e) {}
+        window.location.href = window.location.pathname + '?nocache=' + Date.now();
+    }
+
+    /**
+     * Story & Lore Modal handlers
+     */
+    openStoryModal() {
+        const modal = document.getElementById("modal-story");
+        if (modal) modal.style.display = "flex";
+        if (window.MobileUX) window.MobileUX.vibrate(20);
+    }
+
+    closeStoryModal() {
+        const modal = document.getElementById("modal-story");
+        if (modal) modal.style.display = "none";
+    }
+
+    /**
+     * Read aloud a station's specific task instruction (Crystal clear, 0 static noise, 20% faster)
+     */
+    speakStationTask(text) {
+        if (!window.AudioEngine) return;
+        AudioEngine.speakText(text, {
+            rate: 1.25,
+            pitch: this.faction === "west" ? 0.95 : 1.0,
+            radioClick: false
+        });
+    }
+
+    /**
+     * Re-open Briefing Modal from inside terminal
+     */
+    openBriefingModal() {
+        this.openMissionBriefing(this.faction || "west");
+    }
+
+    /**
+     * Open Briefing Overlay Modal if requested
      */
     openMissionBriefing(factionKey) {
         const isWest = factionKey === "west";
@@ -155,53 +224,11 @@ class GameEngineClass {
             '"Genosse Agent, Befehl: Vorrücken auf dem Kolonnenweg. Wachsam bleiben, keine Fehler!"';
         if (agentDisplay) agentDisplay.textContent = this.playerName;
 
-        // Reset audio button state
-        const btn = document.getElementById("btn-briefing-audio");
-        const wave = document.getElementById("briefing-audio-wave");
-        if (btn) {
-            btn.innerHTML = `<span>🔊</span> AUFTRAG VORLESEN`;
-            btn.classList.remove("playing");
-        }
-        if (wave) wave.classList.remove("active");
-        this.isBriefingSpeaking = false;
-
         modal.style.display = "flex";
     }
 
     /**
-     * Story & Lore Modal handlers
-     */
-    openStoryModal() {
-        const modal = document.getElementById("modal-story");
-        if (modal) modal.style.display = "flex";
-        if (window.MobileUX) window.MobileUX.vibrate(20);
-    }
-
-    closeStoryModal() {
-        const modal = document.getElementById("modal-story");
-        if (modal) modal.style.display = "none";
-    }
-
-    /**
-     * Read aloud a station's specific task instruction
-     */
-    speakStationTask(text) {
-        if (!window.AudioEngine) return;
-        AudioEngine.speakText(text, {
-            rate: 1.05,
-            pitch: this.faction === "west" ? 0.95 : 1.0
-        });
-    }
-
-    /**
-     * Re-open Briefing Modal from inside terminal
-     */
-    openBriefingModal() {
-        this.openMissionBriefing(this.faction || "west");
-    }
-
-    /**
-     * Read aloud mission briefing via SpeechSynthesis & AudioEngine
+     * Read aloud mission briefing via SpeechSynthesis & AudioEngine (20% faster, 0 noise)
      */
     toggleBriefingAudio() {
         const btn = document.getElementById("btn-briefing-audio");
@@ -230,7 +257,7 @@ class GameEngineClass {
             `Achtung Agent ${this.playerName}! Hier spricht Xaver Huber von der Grenzpolizei Hof. Dein Auftrag: Rücke vorsichtig auf dem befestigten Grenzweg vor zu Station eins. Achte auf verdächtige Geräusche und verlasse niemals den befestigten Pfad wegen der Minengefahr. Bei Station eins gibst du den BND-Zugangscode im Terminal ein. Viel Erfolg!` :
             `Genosse Agent ${this.playerName}! Hier spricht Oberstleutnant Schenk, Ministerium für Staatssicherheit. Befehl: Vorrücken auf dem Kolonnenweg Richtung Demarkationslinie. Halte die Augen offen nach BND-Spionen. Sobald du Station eins erreichst, gibst du den Robotron-Code im Terminal ein. Abmarsch!`;
 
-        AudioEngine.speakText(speechText, { rate: 1.05, pitch: isWest ? 0.95 : 1.0 },
+        AudioEngine.speakText(speechText, { rate: 1.25, pitch: isWest ? 0.95 : 1.0, radioClick: false },
             () => {},
             () => {
                 this.isBriefingSpeaking = false;
@@ -311,13 +338,6 @@ class GameEngineClass {
         this.setFaction(factionKey);
         if (window.AudioEngine) {
             window.AudioEngine.init();
-            // Subtle, soft static click (0.12 volume, short squelch)
-            const squelch = window.AudioEngine.play("assets/audio/radio_static.wav", 1.8, false, false, 0.12);
-            if (squelch) {
-                setTimeout(() => {
-                    try { squelch.pause(); squelch.currentTime = 0; } catch (e) {}
-                }, 350);
-            }
         }
 
         // Mobile UX: Keep screen awake during outdoor walking & request compass sensor

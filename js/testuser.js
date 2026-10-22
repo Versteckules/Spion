@@ -1,6 +1,6 @@
 /**
  * Testuser-Modul für Geocache "Operation Schattentausch"
- * - Freigeschaltet durch Eingabe von 'OFFLINETEST'
+ * - Freigeschaltet durch Eingabe von 'OFFLINETEST', 'TEST' oder 1-Klick-Button
  * - Blendet eine Simulations-Leiste am oberen Bildschirmrand ein
  * - Erlaubt 1-Klick-Sofa-Tests aller Wegpunkte, Schusswechsel, Minispiele und Krypto-Funktionen
  */
@@ -11,14 +11,33 @@ class TestUserSimulatorClass {
         this.barElement = null;
         this.keyBuffer = "";
 
-        // Global key sequence listener (typing OFFLINETEST anywhere)
+        // Global key sequence listener (typing OFFLINETEST anywhere, even in inputs)
         window.addEventListener("keydown", (e) => {
-            if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+            if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
+                const val = (e.target.value || "") + (e.key.length === 1 ? e.key : "");
+                if (val.toUpperCase().includes("OFFLINETEST") || val.toUpperCase().trim() === "TEST") {
+                    this.activate();
+                }
+                return;
+            }
             this.keyBuffer += e.key.toUpperCase();
             if (this.keyBuffer.length > 20) this.keyBuffer = this.keyBuffer.slice(-20);
-            if (this.keyBuffer.includes("OFFLINETEST")) {
+            if (this.keyBuffer.includes("OFFLINETEST") || this.keyBuffer.includes("SOFATEST")) {
                 this.activate();
                 this.keyBuffer = "";
+            }
+        });
+
+        // Live input check on the callsign field
+        document.addEventListener("DOMContentLoaded", () => {
+            const nameInput = document.getElementById("agent-callsign-input");
+            if (nameInput) {
+                nameInput.addEventListener("input", () => {
+                    const v = nameInput.value.trim().toUpperCase();
+                    if (v.includes("OFFLINETEST") || v === "TEST" || v === "SOFA") {
+                        this.activate();
+                    }
+                });
             }
         });
 
@@ -32,10 +51,12 @@ class TestUserSimulatorClass {
     }
 
     /**
-     * Check if entered string matches OFFLINETEST
+     * Check if entered string matches OFFLINETEST or TEST
      */
     checkInput(inputString) {
-        if (inputString.trim().toUpperCase() === "OFFLINETEST") {
+        if (!inputString) return false;
+        const clean = inputString.trim().toUpperCase();
+        if (clean === "OFFLINETEST" || clean === "TEST" || clean === "SOFA" || clean.includes("OFFLINETEST")) {
             this.activate();
             return true;
         }
@@ -51,6 +72,17 @@ class TestUserSimulatorClass {
         document.body.classList.add("testbar-active");
 
         console.log("✅ OFFLINETEST-Modus aktiviert: GPS-Zwang aufgehoben, Simulations-Leiste aktiv.");
+
+        // If player is still on cover screen, automatically initialize into Act 1
+        if (window.GameEngine) {
+            const cover = document.getElementById("cover-screen");
+            if (cover && cover.style.display !== "none") {
+                window.GameEngine.playerName = window.GameEngine.playerName || "TestAgent";
+                window.GameEngine.faction = window.GameEngine.faction || "west";
+                window.GameEngine.startConfirmedMission();
+            }
+        }
+
         this.renderBar();
 
         if (window.GameEngine && window.GameEngine.showInGameModal) {
@@ -76,7 +108,7 @@ class TestUserSimulatorClass {
         const checkpoints = faction === "west" ? MISSION_CONFIG.WEST.CHECKPOINTS : MISSION_CONFIG.OST.CHECKPOINTS;
 
         let buttonsHtml = checkpoints.map((cp, idx) => `
-            <button class="btn-test-wp" data-lat="${cp.lat}" data-lon="${cp.lon}" data-idx="${idx}">
+            <button class="btn-test-wp" data-lat="${cp.lat}" data-lon="${cp.lon}" data-idx="${idx}" title="${cp.name}">
                 ${idx === 2 ? '💥' : (idx === 3 ? '↩️' : (idx === 4 ? '📍' : '🔘'))} P${idx + 1}: ${cp.name.split(' ')[0]}
             </button>
         `).join("");
@@ -99,7 +131,12 @@ class TestUserSimulatorClass {
             btn.onclick = () => {
                 const lat = parseFloat(btn.dataset.lat);
                 const lon = parseFloat(btn.dataset.lon);
-                GPSEngine.simulateLocation(lat, lon, 2.5);
+                if (window.GPSEngine) {
+                    window.GPSEngine.simulateLocation(lat, lon, 2.5);
+                }
+                if (window.MapEngine) {
+                    window.MapEngine.updatePlayerPosition(lat, lon);
+                }
                 btn.classList.add("active");
                 setTimeout(() => btn.classList.remove("active"), 1200);
             };

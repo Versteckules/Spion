@@ -133,7 +133,7 @@ class AudioEngineClass {
     }
 
     /**
-     * Read aloud text via SpeechSynthesis (German) with subtle radio squelch
+     * Read aloud text via SpeechSynthesis (German) - crystal clear voice without static hiss, brisk military pace (+20% faster)
      */
     speakText(text, options = {}, onStart = null, onEnd = null) {
         this.init();
@@ -145,22 +145,23 @@ class AudioEngineClass {
 
         window.speechSynthesis.cancel();
 
-        // Subtle, gentle radio squelch (0.12 volume) that cuts off after 350ms so voice is crystal clear
-        if (options.radioClick !== false) {
-            const squelch = this.play("assets/audio/radio_static.wav", 1.8, false, false, 0.12);
+        // Zero noise during instruction reading: no static hiss or squelch
+        if (options.radioClick === true) {
+            const squelch = this.play("assets/audio/radio_static.wav", 2.0, false, false, 0.03);
             if (squelch) {
                 setTimeout(() => {
                     try {
                         squelch.pause();
                         squelch.currentTime = 0;
                     } catch (e) {}
-                }, 350);
+                }, 150);
             }
         }
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = "de-DE";
-        utterance.rate = options.rate || 1.05;
+        // 20% faster speech pace for crisp, concise military delivery
+        utterance.rate = options.rate || 1.25;
         utterance.pitch = options.pitch || 0.95;
 
         // Try to pick a natural German voice if available

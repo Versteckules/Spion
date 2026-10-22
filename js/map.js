@@ -193,22 +193,38 @@ class MapEngineClass {
         const container = document.getElementById(this.containerId);
         if (!container) return;
 
+        // If map was not initialized or container was previously 0-sized
         if (!this.map && typeof L !== 'undefined') {
             this.initLeaflet(container);
+        } else if (this.map && typeof L !== 'undefined') {
+            try {
+                const s = this.map.getSize();
+                if (s.x === 0 || s.y === 0) {
+                    this.map.remove();
+                    this.map = null;
+                    this.initLeaflet(container);
+                }
+            } catch(e) {
+                this.map = null;
+                this.initLeaflet(container);
+            }
         }
 
         if (this.map) {
-            // Immediate resize attempt
-            try { this.map.invalidateSize(true); } catch (e) {}
+            try { 
+                this.map.invalidateSize(true); 
+                this.map.setView([this.lastLat, this.lastLon], 16);
+            } catch (e) {}
 
-            // Staggered resize attempts to guarantee tile rendering even during layout animations
-            [40, 120, 250, 500].forEach(delay => {
+            // Staggered resize attempts to guarantee tile rendering
+            [30, 100, 250, 500].forEach(delay => {
                 setTimeout(() => {
+                    if (!this.map) return;
                     try {
                         this.map.invalidateSize(true);
 
                         const z = this.map.getZoom();
-                        if (isNaN(z) || z === undefined) {
+                        if (isNaN(z) || z === undefined || z < 10) {
                             this.map.setView([this.lastLat, this.lastLon], 16);
                         }
 

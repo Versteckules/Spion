@@ -18,30 +18,33 @@ Beim ersten Öffnen der Web-App empfängt den Spieler ein hochästhetischer, min
   * *Owner-Geheimfunktion:* Ein schneller Dreifachklick auf das Avatarbild schaltet die Test- und Simulationsleiste frei.
 * **Agenten-Registrierung (Schnell & intuitiv):**
   * Prominentes Eingabefeld: `Codename / Agentenname (z.B. Adler-7, Sperber, Versteckules)`.
-  * Verhindert unpersönliche Sessions; Name wird dauerhaft gespeichert und im gesamten HUD angezeigt.
-  * Erst nach Eingabe eines Namens werden die beiden Einsatzseiten freigeschaltet.
-* **Fraktions-Auswahl (2 kontrastreiche Tasten):**
+  * Verhindert unpersönliche Sessions; Name wird dauerhaft gespeichert und im gesamten HUD angezeigt (Default: `Agent-07` / `Genosse-Falke`, kein Blockieren mit Fehlermeldungen).
+  * Bei Eingabe von `OFFLINETEST`, `TEST` oder `SOFA` schaltet die App sofort in den Sofa-Testmodus um.
+* **Fraktions-Auswahl mit Direktstart (Weniger ist mehr):**
   * `[ 🦁 MISSION WEST (Bayern / BND) ]` – Start bei Münchenreuth (`50.330406, 12.069081`)
   * `[ ⚒️ MISSION OST (Sachsen / MfS) ]` – Start bei Gutenfürst (`50.331520, 12.069700`)
+  * **Sofortiger Einsatzstart:** Klick auf die Fraktion leitet ohne zeitraubende Zwischenmodale direkt zu Station 1 über!
+* **Startseiten-Schnellzugriff:**
+  * `[ 🗺️ EINSATZKARTE ANSEHEN ]`: Öffnet sofort die Übersichtskarte des Grenzabschnitts (Bayern/Sachsen).
+  * `[ 🛠️ OFFLINE-TESTMODUS ]`: 1-Klick-Aktivierung der Simulationsleiste am oberen Bildschirmrand.
+  * `[ 🔄 AKTUALISIEREN / CACHE LEEREN ]`: Bereinigt Browser-Caches und Service-Worker bei Updates.
 * **Owner-Direktlink:** Am Fuß der Seite diskreter Link zu `admin.html` (HQ Final-Editor).
 
 ---
 
-### 1.5. Visuelles Mission Briefing (Intro mit Bildern & Vorlese-Audio)
+### 1.5. Direktstart & Station 1 ("Weniger ist mehr")
 
-Um Textüberladung zu vermeiden und den Spielern glasklar zu vermitteln, was vor Ort zu tun ist, öffnet sich nach der Wahl ein animiertes **Einsatzbefehl-Overlay**:
-1. **Führungsoffizier-Porträt & Dienstsiegel:**
-   * **West:** Großes Polaroid von **Polizeihauptkommissar Xaver Huber** (`assets/img/person_xaver.png`) & BND-Wappen.
-   * **Ost:** Großes Polaroid von **Oberstleutnant Ronny Schenk** (`assets/img/person_schenk.png`) & MfS-Wappen.
-2. **Die 3 Aktions-Schritte (Auf einen Blick erfassbar):**
-   * 🚶 **1. MARSCHIEREN & ORTEN:** Folge dem Peilkompass und der Meter-Anzeige zu Station 1 am Grenzpfad.
-   * 🔍 **2. ERMITTELN & EINGEBEN:** Suche vor Ort nach Hinweisen und gib gefundene Codes im Terminal ein.
-   * 🎧 **3. FUNK BEACHTEN:** Halte dein Audio laut – bei Zwischenfällen meldet sich dein Einsatzleiter.
-3. **Aufgabe vorlesen (Sprachausgabe & Audio-Visualizer):**
-   * Taste `[ 🔊 AUFTRAG VORLESEN ]` mit animiertem Frequenz-Equalizer.
-   * Nutzt Web Speech API (synthetische deutsche Stimme mit Funkrauschen) und liest den individuellen Einsatzbefehl mit Namen des Agenten laut vor.
-   * Taste `[ 🚀 VERSTANDEN – EINSATZ STARTEN ▶ ]` leitet direkt in das Outdoor-HUD über.
-   * Jederzeit im Terminal über `[ 📋 Einsatzbefehl anzeigen & vorlesen ]` erneut aufrufbar.
+Um Textüberladung und Frustration zu verhindern, verzichtet der Startflow auf lange Zwischenfenster mit doppelten Handlungsanweisungen:
+1. **Sofortiger Einstieg bei Station 1:**
+   * Nach Klick auf West oder Ost befindet sich der Agent unmittelbar im Einsatz-Terminal von Station 1.
+   * Keine 3 doppelten Hinweiskästen mehr – die Station selbst erklärt klipp und klar, was vor Ort zu tun ist.
+2. **Kompaktes Führungs-Briefing (optional im Terminal aufrufbar):**
+   * **West:** Porträt von **Polizeihauptkommissar Xaver Huber** (`assets/img/person_xaver.png`) & BND-Wappen.
+   * **Ost:** Porträt von **Oberstleutnant Ronny Schenk** (`assets/img/person_schenk.png`) & MfS-Wappen.
+   * Ein prägnanter 1-Satz-Missionsbefehl statt Textwüsten.
+3. **Glasklare Vorlese-Funktion (20% schneller, absolut rauschfrei):**
+   * Taste `[ 🔊 VORLESEN ]` liest die Aufgaben mit zügiger, dynamischer Militärstimme (`rate: 1.25`) vor.
+   * **Kein Funkrauschen/Zischen beim Vorlesen:** Die Sprachausgabe ertönt vollkommen sauber und ungestört ohne störenden Radio-Squelch.
 
 ---
 
@@ -84,24 +87,24 @@ Im Gelände herrscht maximale Klarheit. Jeder Akt und jede Station folgt einer s
 
 ### 2.5. Karten-Garantie (Map Engine & Edge-to-Edge Navigation)
 
-1. **Behebung des 0-Pixel-Kollapses:**
-   * Durchgängige CSS-Flexbox-Vererbung (`.tab-content-area` mit `min-height: 0; display: flex; flex-direction: column`) garantiert, dass `#map-container` unter iOS Safari, Chrome Mobile und Android immer die volle verfügbare Bildschirmhöhe ausfüllt.
-2. **Zuverlässige Kacheln (100% Verfügbarkeit):**
-   * Standardmäßig angebundene OpenStreetMap-Kacheln (`tile.openstreetmap.org`) mit lokalem phosphor-grünem bzw. bernsteinfarbenem Retro-Militärfilter (CSS `invert` & `hue-rotate`). Keine Abhängigkeit von externen API-Keys oder blockierten Drittanbieter-CDNs.
-   * Sollte im Funkloch kein Internetempfang bestehen, schaltet die App mit einem Klick auf die integrierte **SVG-Vektorkarte** um.
+1. **Behebung des 0-Pixel-Kollapses & Verlässliche Höhe:**
+   * `#tab-map.active` und `#map-container` besitzen feste Fallback-Dimensionen (`height: calc(100vh - 120px); min-height: 400px; width: 100%`).
+   * Leaflet wird bei Container-Größe 0 im Hintergrund geschützt und beim Wechsel auf den Karten-Tab automatisch auf die realen Pixelabmessungen re-initialisiert (`map.invalidateSize(true)`).
+2. **Glasklare Kachelsichtbarkeit (Kein Schwarzbild durch Invertierung):**
+   * Standardmäßig angebundene OpenStreetMap-Kacheln (`tile.openstreetmap.org`) mit dezentem Kontrastfilter (`contrast(106%) brightness(96%)`) statt extremem Schwarz-Invert-Filter. Straßen, Wege, Wälder und Grenzgraben sind auch im Sonnenlicht im Gelände 100% deutlich sichtbar.
+   * Sollte im Funkloch kein Internetempfang bestehen, schaltet die App nahtlos auf die integrierte **SVG-Vektorkarte** um (`🛰️ VEKTOR`).
 3. **Nahtlose 2-Wege-Navigation:**
    * An jeder Station bringt ein Klick auf `[ 🗺️ AUF DER KARTE ANZEIGEN ]` den Spieler direkt zur Karte, zentriert auf die Station (Zoomstufe 17) und öffnet das Info-Popup.
    * Auf der Karte befindet sich ein schwebender Button `[ 📟 ZUR STATION ]`, mit dem man blitzschnell zur Eingabe zurückkehrt.
-4. **Mehrstufige Geometrie-Reparatur (`invalidateSize`):**
-   * Beim Tab-Wechsel auf die Karte wird Leaflet mehrfach gestaffelt (40ms, 120ms, 250ms, 500ms) re-initialisiert, um Rendering-Verzögerungen bei CSS-Animationen vollständig abzufangen.
+   * Von der Startseite aus erlaubt `[ 🗺️ EINSATZKARTE ANSEHEN ]` den direkten Blick auf das Gelände noch vor dem Spielstart.
 
 ---
 
-### 2.8. Akustisches Balancing (Kein lautes Rauschen beim Vorlesen)
+### 2.8. Akustisches Balancing (Kein Rauschen beim Vorlesen, 20% schneller)
 
-* **Dezenter Radio-Squelch:** Beim Auslösen der Sprachausgabe (`AudioEngine.speakText`) wird das Funkrauschen auf eine sehr leise Lautstärke von **0.12** gedämpft und nach **350 Millisekunden** automatisch ausgeblendet. Es ertönt ein kurzes, authentisches Knacken ("chrrk") wie beim Einschalten eines Funkgeräts, danach ist die Stimme glasklar und ungestört verständlich.
-* **Lautstärkesteuerung für alle Sounds:** `AudioEngine.play(...)` unterstützt nun explizite Lautstärkeparameter (`volume = 1.0`).
-* **Hintergrund-Schleifen gedämpft:** Störfunk- und Radioschleifen laufen auf subtilen **0.08** Lautstärke, um eine stimmungsvolle Atmosphäre zu schaffen, ohne die Nerven der Spieler im Gelände zu strapazieren.
+* **Absolut rauschfreie Sprachausgabe:** Beim Auslösen von `AudioEngine.speakText` wird kein Funkrauschen (`radio_static.wav`) abgespielt. Die Stimme ist sofort glasklar und ungestört verständlich.
+* **20% schnelleres Sprechtempo:** Die Sprechgeschwindigkeit wurde von `1.05` auf `1.25` angehoben. Anweisungen klingen prägnant, dynamisch und militärisch zügig.
+* **Lautstärkesteuerung & dezente Hintergrund-Schleifen:** Dialekt-Notrufe und Effekte klingen authentisch, ohne zu übersteuern.
 
 ---
 

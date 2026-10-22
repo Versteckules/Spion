@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schattentausch-v5';
+const CACHE_NAME = 'schattentausch-v7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -59,11 +59,12 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log('[SW] Pre-caching offline assets...');
+      console.log('[SW] Pre-caching offline assets v7...');
       return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting())
+    })
   );
 });
 
@@ -71,33 +72,56 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+        keys.filter(k => k !== CACHE_NAME).map(k => {
+          console.log('[SW] Clearing old cache:', k);
+          return caches.delete(k);
+        })
       );
     }).then(() => self.clients.claim())
   );
 });
 
+// Network-First for HTML/JS/CSS to guarantee fresh updates during dev & testing, fallback to Cache when offline
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then(response => {
-        // Cache fetched tile images or dynamic assets
-        if (response && response.status === 200 && event.request.method === 'GET') {
-          const respClone = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, respClone);
+  const url = new URL(event.request.url);
+  const isCodeOrHtml = event.request.mode === 'navigate' || 
+                       url.pathname.endsWith('.html') || 
+                       url.pathname.endsWith('.js') || 
+                       url.pathname.endsWith('.css') ||
+                       url.pathname.endsWith('.json');
+
+  if (isCodeOrHtml) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200 && event.request.method === 'GET') {
+            const respClone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, respClone));
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request).then(cached => {
+            if (cached) return cached;
+            if (event.request.mode === 'navigate') {
+              return caches.match('./index.html');
+            }
           });
-        }
-        return response;
-      }).catch(() => {
-        // Fallback for failed offline fetches
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-      });
-    })
-  );
+        })
+    );
+  } else {
+    // Media & binary files: Cache-First
+    event.respondWith(
+      caches.match(event.request).then(cachedResponse => {
+        if (cachedResponse) return cachedResponse;
+        return fetch(event.request).then(response => {
+          if (response && response.status === 200 && event.request.method === 'GET') {
+            const respClone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, respClone));
+          }
+          return response;
+        });
+      })
+    );
+  }
 });
