@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HQ ADMIN & FINAL-EDITOR | Operation Schattentausch</title>
+    <meta name="description" content="Owner-Konfigurations-Tool für den Geocache Operation Schattentausch. Final-Koordinaten live ändern und AES-256 verschlüsseln.">
+    <link rel="stylesheet" href="css/terminal.css">
+    <link rel="stylesheet" href="css/cover.css">
+    <style>
+        body {
+            background-color: #060906;
+            color: #33ff33;
+            font-family: var(--font-mono);
+            overflow-y: auto;
+            padding: 20px 14px 40px 14px;
+        }
+
+        .admin-container {
+            max-width: 760px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .admin-header {
+            border-bottom: 2px solid #33ff33;
+            padding-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .admin-title {
+            font-family: var(--font-crt);
+            font-size: 28px;
+            color: #fff;
+            text-shadow: 0 0 12px rgba(51, 255, 51, 0.7);
+        }
+
+        .admin-subtitle {
+            font-size: 12px;
+            color: #33ff33;
+            letter-spacing: 1px;
+        }
+
+        .admin-badge {
+            background: rgba(51, 255, 51, 0.15);
+            border: 1px solid #33ff33;
+            color: #33ff33;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 3px;
+        }
+
+        .admin-card {
+            background: rgba(12, 18, 12, 0.9);
+            border: 1px solid #33ff33;
+            border-radius: 4px;
+            padding: 16px 18px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .admin-card.amber {
+            border-color: #ffb000;
+            color: #ffb000;
+        }
+
+        .admin-card.amber .card-header {
+            color: #ffb000;
+            border-bottom-color: rgba(255, 176, 0, 0.3);
+        }
+
+        .card-header {
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            color: #33ff33;
+            border-bottom: 1px solid rgba(51, 255, 51, 0.3);
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .field-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #ccc;
+        }
+
+        .field-desc {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .admin-input, .admin-textarea {
+            background: #000;
+            border: 1px solid #33ff33;
+            color: #fff;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            padding: 10px 12px;
+            border-radius: 3px;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .admin-card.amber .admin-input, .admin-card.amber .admin-textarea {
+            border-color: #ffb000;
+        }
+
+        .admin-textarea {
+            min-height: 70px;
+            resize: vertical;
+        }
+
+        .grid-2-col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .btn-admin {
+            background: #33ff33;
+            color: #000;
+            border: none;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 12px 18px;
+            cursor: pointer;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-admin:hover {
+            box-shadow: 0 0 15px rgba(51, 255, 51, 0.7);
+            filter: brightness(1.1);
+        }
+
+        .btn-admin.secondary {
+            background: transparent;
+            border: 1px solid #33ff33;
+            color: #33ff33;
+        }
+
+        .btn-admin.danger {
+            background: transparent;
+            border: 1px solid #ff4444;
+            color: #ff4444;
+        }
+
+        .btn-admin.danger:hover {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .status-alert-box {
+            padding: 10px 14px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 1.4;
+            display: none;
+        }
+
+        .status-alert-box.success {
+            background: rgba(51, 255, 51, 0.15);
+            border: 1px solid #33ff33;
+            color: #33ff33;
+            display: block;
+        }
+
+        .status-alert-box.error {
+            background: rgba(255, 51, 51, 0.15);
+            border: 1px solid #ff4444;
+            color: #ff6666;
+            display: block;
+        }
+
+        .code-preview-box {
+            background: #020402;
+            border: 1px solid #444;
+            padding: 10px 12px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: #aaffaa;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+
+        <!-- Top Header -->
+        <header class="admin-header">
+            <div>
+                <div class="admin-badge">VERSTECKULES OWNER WERKZEUG • 1983 KRYPTO-EDITOR</div>
+                <h1 class="admin-title">HQ FINAL-KOORDINATEN EDITOR</h1>
+                <div class="admin-subtitle">OPERATION SCHATTENTAUSCH – GRENZE BAYERN / SACHSEN</div>
+            </div>
+            <a href="index.html" class="btn-admin secondary">
+                🚀 ZURÜCK ZUR APP
+            </a>
+        </header>
+
+        <!-- Status Message Box -->
+        <div id="status-box" class="status-alert-box"></div>
+
+        <!-- CARD 1: FINAL WEST (Bayern) -->
+        <div class="admin-card amber">
+            <div class="card-header">
+                <span>🦁 DOSE WEST (BAYERN / BND) – FINAL-KOORDINATEN</span>
+                <span style="font-size: 11px; opacity: 0.8;">AES-256-GCM</span>
+            </div>
+            <div class="field-group">
+                <label class="field-label" for="coord-west">Klartext-Koordinaten & Final-Hinweis für West-Spieler:</label>
+                <div class="field-desc">Dieser Text wird dem Spieler nach Lösung aller 5 Akte im Terminal angezeigt:</div>
+                <textarea id="coord-west" class="admin-textarea" placeholder="z.B. N 50° 19.835' E 012° 04.160' (Dose West: Unter Wurzel alter Grenzbaum)"></textarea>
+            </div>
+            <div class="field-group">
+                <span class="field-desc">Live verschlüsselte Vorschau (AES-256):</span>
+                <div id="preview-west-crypto" class="code-preview-box">Wird berechnet...</div>
+            </div>
+        </div>
+
+        <!-- CARD 2: FINAL OST (Sachsen) -->
+        <div class="admin-card">
+            <div class="card-header">
+                <span>⚒️ DOSE OST (SACHSEN / MFS) – FINAL-KOORDINATEN</span>
+                <span style="font-size: 11px; opacity: 0.8;">AES-256-GCM</span>
+            </div>
+            <div class="field-group">
+                <label class="field-label" for="coord-ost">Klartext-Koordinaten & Final-Hinweis für Ost-Spieler:</label>
+                <div class="field-desc">Dieser Text wird dem Spieler nach Lösung aller 5 Akte im Terminal angezeigt:</div>
+                <textarea id="coord-ost" class="admin-textarea" placeholder="z.B. N 50° 19.905' E 012° 04.195' (Dose Ost: Hinter altem Grenzstein im Hohlraum)"></textarea>
+            </div>
+            <div class="field-group">
+                <span class="field-desc">Live verschlüsselte Vorschau (AES-256):</span>
+                <div id="preview-ost-crypto" class="code-preview-box">Wird berechnet...</div>
+            </div>
+        </div>
+
+        <!-- CARD 3: MISSION SOLUTIONS / KEYS -->
+        <div class="admin-card">
+            <div class="card-header">
+                <span>🔐 SCHLÜSSEL-PARAMETER DER MISSION (LÖSUNGSDATEN)</span>
+                <span style="font-size: 11px; opacity: 0.8;">SHA-256 Key Derivation</span>
+            </div>
+            <div class="field-desc">Diese Werte bilden die kryptografische Passphrase zur Entschlüsselung des Finals:</div>
+            
+            <div class="grid-2-col">
+                <div class="field-group">
+                    <label class="field-label" for="key-startcode">Start-Code (Akt 1):</label>
+                    <input type="text" id="key-startcode" class="admin-input" value="1983" />
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="key-triage">Triage-Code (Akt 3):</label>
+                    <input type="text" id="key-triage" class="admin-input" value="SOS" />
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="key-freq-west">Funkfrequenz West (kHz):</label>
+                    <input type="text" id="key-freq-west" class="admin-input" value="462" />
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="key-freq-ost">Funkfrequenz Ost (kHz):</label>
+                    <input type="text" id="key-freq-ost" class="admin-input" value="480" />
+                </div>
+                <div class="field-group" style="grid-column: 1 / -1;">
+                    <label class="field-label" for="key-mole">Überführter Schütze / Maulwurf (Akt 5):</label>
+                    <input type="text" id="key-mole" class="admin-input" value="RICHTER" />
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 4: ACTIONS -->
+        <div class="admin-card">
+            <div class="card-header">
+                <span>⚡ SPEICHERN & TESTEN</span>
+            </div>
+            
+            <div class="action-row">
+                <button class="btn-admin" onclick="AdminTool.encryptAndSaveLive()">
+                    💾 1-KLICK: VERSCHLÜSSELN & LIVE SPEICHERN
+                </button>
+                <button class="btn-admin secondary" onclick="AdminTool.testDecryption()">
+                    🧪 ENTSCHLÜSSELUNG TESTEN
+                </button>
+                <button class="btn-admin secondary" onclick="AdminTool.generateConfigCode()">
+                    📋 CODE FÜR JS/CONFIG.JS KOPIEREN
+                </button>
+                <button class="btn-admin danger" onclick="AdminTool.resetToDefaults()">
+                    🔄 AUF WERKS-WERTE ZURÜCKSETZEN
+                </button>
+            </div>
+        </div>
+
+        <!-- Generated Code Snippet for Git commit -->
+        <div id="config-snippet-card" class="admin-card" style="display: none;">
+            <div class="card-header">
+                <span>📋 SNIPPET FÜR JS/CONFIG.JS (ZUR DAUERHAFTEN ÜBERNAHME)</span>
+                <button class="btn-admin secondary" style="padding: 4px 8px; font-size: 11px;" onclick="AdminTool.copySnippetToClipboard()">
+                    Kopieren
+                </button>
+            </div>
+            <div id="config-snippet-code" class="code-preview-box"></div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/crypto.js"></script>
+    <script>
+        const AdminTool = {
+            defaultWest: "N 50° 19.835' E 012° 04.160' (Dose West: Unter Wurzel alter Grenzbaum)",
+            defaultOst: "N 50° 19.905' E 012° 04.195' (Dose Ost: Hinter altem Grenzstein im Hohlraum)",
+
+            async init() {
+                // Load existing configuration from localStorage if available
+                const saved = localStorage.getItem("SPION_CUSTOM_FINAL_CONFIG");
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        if (parsed.WEST_PLAINTEXT) document.getElementById("coord-west").value = parsed.WEST_PLAINTEXT;
+                        if (parsed.OST_PLAINTEXT) document.getElementById("coord-ost").value = parsed.OST_PLAINTEXT;
+                        if (parsed.SOLUTIONS) {
+                            if (parsed.SOLUTIONS.START_CODE) document.getElementById("key-startcode").value = parsed.SOLUTIONS.START_CODE;
+                            if (parsed.SOLUTIONS.TRIAGE_CODE) document.getElementById("key-triage").value = parsed.SOLUTIONS.TRIAGE_CODE;
+                            if (parsed.SOLUTIONS.RADIO_FREQ_WEST) document.getElementById("key-freq-west").value = parsed.SOLUTIONS.RADIO_FREQ_WEST;
+                            if (parsed.SOLUTIONS.RADIO_FREQ_OST) document.getElementById("key-freq-ost").value = parsed.SOLUTIONS.RADIO_FREQ_OST;
+                            if (parsed.SOLUTIONS.TRUE_MOLE) document.getElementById("key-mole").value = parsed.SOLUTIONS.TRUE_MOLE;
+                        }
+                        this.showStatus("✅ Eigene gespeicherte Final-Koordinaten geladen.", "success");
+                    } catch (e) {}
+                }
+
+                if (!document.getElementById("coord-west").value) {
+                    document.getElementById("coord-west").value = this.defaultWest;
+                }
+                if (!document.getElementById("coord-ost").value) {
+                    document.getElementById("coord-ost").value = this.defaultOst;
+                }
+
+                // Attach change listeners to live update previews
+                document.getElementById("coord-west").addEventListener("input", () => this.updateLivePreview());
+                document.getElementById("coord-ost").addEventListener("input", () => this.updateLivePreview());
+                ["key-startcode", "key-triage", "key-freq-west", "key-freq-ost", "key-mole"].forEach(id => {
+                    document.getElementById(id).addEventListener("input", () => this.updateLivePreview());
+                });
+
+                this.updateLivePreview();
+            },
+
+            getFormValues() {
+                return {
+                    coordWest: document.getElementById("coord-west").value.trim(),
+                    coordOst: document.getElementById("coord-ost").value.trim(),
+                    startCode: document.getElementById("key-startcode").value.trim(),
+                    triageCode: document.getElementById("key-triage").value.trim(),
+                    freqWest: document.getElementById("key-freq-west").value.trim(),
+                    freqOst: document.getElementById("key-freq-ost").value.trim(),
+                    mole: document.getElementById("key-mole").value.trim()
+                };
+            },
+
+            async updateLivePreview() {
+                const f = this.getFormValues();
+                try {
+                    const keyWest = await CryptoEngine.deriveKey(f.startCode, f.triageCode, f.freqWest, f.mole, "WEST");
+                    const encWest = await CryptoEngine.encrypt(f.coordWest, keyWest);
+                    document.getElementById("preview-west-crypto").textContent = JSON.stringify(encWest, null, 2);
+
+                    const keyOst = await CryptoEngine.deriveKey(f.startCode, f.triageCode, f.freqOst, f.mole, "OST");
+                    const encOst = await CryptoEngine.encrypt(f.coordOst, keyOst);
+                    document.getElementById("preview-ost-crypto").textContent = JSON.stringify(encOst, null, 2);
+                } catch (e) {
+                    console.warn("Vorschau-Verschlüsselung:", e);
+                }
+            },
+
+            async encryptAndSaveLive() {
+                const f = this.getFormValues();
+                if (!f.coordWest || !f.coordOst) {
+                    this.showStatus("⚠️ Bitte für beide Seiten Final-Koordinaten eintragen!", "error");
+                    return;
+                }
+
+                try {
+                    const keyWest = await CryptoEngine.deriveKey(f.startCode, f.triageCode, f.freqWest, f.mole, "WEST");
+                    const encWest = await CryptoEngine.encrypt(f.coordWest, keyWest);
+
+                    const keyOst = await CryptoEngine.deriveKey(f.startCode, f.triageCode, f.freqOst, f.mole, "OST");
+                    const encOst = await CryptoEngine.encrypt(f.coordOst, keyOst);
+
+                    const configPayload = {
+                        timestamp: Date.now(),
+                        WEST_PLAINTEXT: f.coordWest,
+                        OST_PLAINTEXT: f.coordOst,
+                        WEST_FINAL: encWest,
+                        OST_FINAL: encOst,
+                        SOLUTIONS: {
+                            START_CODE: f.startCode,
+                            TRIAGE_CODE: f.triageCode,
+                            RADIO_FREQ_WEST: f.freqWest,
+                            RADIO_FREQ_OST: f.freqOst,
+                            TRUE_MOLE: f.mole
+                        }
+                    };
+
+                    localStorage.setItem("SPION_CUSTOM_FINAL_CONFIG", JSON.stringify(configPayload));
+                    this.showStatus("🔒 ERFOLGREICH GESPEICHERT! Die Live-Web-App (index.html) verwendet ab sofort diese verschlüsselten Koordinaten.", "success");
+                } catch (err) {
+                    this.showStatus("Fehler bei der Verschlüsselung: " + err.message, "error");
+                }
+            },
+
+            async testDecryption() {
+                const f = this.getFormValues();
+                try {
+                    const keyWest = await CryptoEngine.deriveKey(f.startCode, f.triageCode, f.freqWest, f.mole, "WEST");
+                    const encWest = await CryptoEngine.encrypt(f.coordWest, keyWest);
+                    const decWest = await CryptoEngine.decrypt(encWest, keyWest);
+
+                    const keyOst = await CryptoEngine.deriveKey(f.startCode, f.triageCode, f.freqOst, f.mole, "OST");
+                    const encOst = await CryptoEngine.encrypt(f.coordOst, keyOst);
+                    const decOst = await CryptoEngine.decrypt(encOst, keyOst);
+
+                    if (decWest === f.coordWest && decOst === f.coordOst) {
+                        this.showStatus(`🧪 TEST BESTANDEN (100% OK)!\nWest entschlüsselt: "${decWest}"\nOst entschlüsselt: "${decOst}"`, "success");
+                    } else {
+                        this.showStatus("⚠️ Test fehlerhaft: Entschlüsselter Text weicht ab!", "error");
+                    }
+                } catch (err) {
+                    this.showStatus("Test fehlgeschlagen: " + err.message, "error");
+                }
+            },
+
+            async generateConfigCode() {
+                const f = this.getFormValues();
+                const keyWest = await CryptoEngine.deriveKey(f.startCode, f.triageCode, f.freqWest, f.mole, "WEST");
+                const encWest = await CryptoEngine.encrypt(f.coordWest, keyWest);
+
+                const keyOst = await CryptoEngine.deriveKey(f.startCode, f.triageCode, f.freqOst, f.mole, "OST");
+                const encOst = await CryptoEngine.encrypt(f.coordOst, keyOst);
+
+                const snippet = `// In js/config.js unter WEST und OST eintragen:\n\nWEST: {\n    ENCRYPTED_FINAL: ${JSON.stringify(encWest, null, 8)}\n},\n\nOST: {\n    ENCRYPTED_FINAL: ${JSON.stringify(encOst, null, 8)}\n}`;
+                document.getElementById("config-snippet-code").textContent = snippet;
+                document.getElementById("config-snippet-card").style.display = "flex";
+                this.showStatus("📋 JS-Code-Snippet generiert (unten angezeigt).", "success");
+            },
+
+            copySnippetToClipboard() {
+                const text = document.getElementById("config-snippet-code").textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    alert("Snippet in die Zwischenablage kopiert!");
+                });
+            },
+
+            resetToDefaults() {
+                if (confirm("Möchtest du wirklich alle Werte auf die Original-Werkseinstellungen zurücksetzen?")) {
+                    localStorage.removeItem("SPION_CUSTOM_FINAL_CONFIG");
+                    document.getElementById("coord-west").value = this.defaultWest;
+                    document.getElementById("coord-ost").value = this.defaultOst;
+                    document.getElementById("key-startcode").value = "1983";
+                    document.getElementById("key-triage").value = "SOS";
+                    document.getElementById("key-freq-west").value = "462";
+                    document.getElementById("key-freq-ost").value = "480";
+                    document.getElementById("key-mole").value = "RICHTER";
+                    this.updateLivePreview();
+                    this.showStatus("🔄 Werkseinstellungen wiederhergestellt.", "success");
+                }
+            },
+
+            showStatus(msg, type = "success") {
+                const box = document.getElementById("status-box");
+                box.className = `status-alert-box ${type}`;
+                box.textContent = msg;
+                box.style.display = "block";
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        };
+
+        document.addEventListener("DOMContentLoaded", () => AdminTool.init());
+    </script>
+</body>
+</html>

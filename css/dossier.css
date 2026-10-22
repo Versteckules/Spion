@@ -1,0 +1,228 @@
+/* ==========================================================================
+   Dossier & Character Profiles Styling (1980s Polaroid Look)
+   ========================================================================== */
+
+.dossiers-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--text-primary);
+}
+
+.dossier-list-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-bottom: 30px;
+}
+
+.dossier-card {
+    background: #fbf7ee;
+    color: #1a1a1a;
+    border: 1px solid #d4c8b0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    display: flex;
+    padding: 12px;
+    gap: 14px;
+    border-radius: 2px;
+    position: relative;
+    transition: transform 0.2s;
+}
+
+.dossier-card:hover {
+    transform: translateY(-2px);
+}
+
+.dossier-polaroid {
+    width: 90px;
+    height: 115px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    background: #fff;
+    padding: 3px 3px 12px 3px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    flex-shrink: 0;
+}
+
+.dossier-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.dossier-name {
+    font-size: 15px;
+    font-weight: bold;
+    color: #8b0000;
+    margin-bottom: 2px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.dossier-rank {
+    font-size: 11px;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 4px;
+}
+
+.dossier-role {
+    display: inline-block;
+    background: #e4d8c0;
+    color: #333;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-bottom: 6px;
+    border-radius: 2px;
+}
+
+.dossier-desc {
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: #222;
+}
+
+/* Phone Overlay Modal */
+.phone-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 800;
+    padding: 16px;
+}
+
+.phone-overlay.visible {
+    display: flex;
+}
+
+.phone-crt-frame {
+    background: #0d140d;
+    border: 2px solid var(--text-primary);
+    box-shadow: 0 0 30px var(--text-glow);
+    max-width: 440px;
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.phone-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--alert-red);
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.caller-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    background: rgba(0,0,0,0.5);
+    padding: 12px;
+    border: 1px solid var(--text-primary);
+    margin-bottom: 16px;
+}
+
+.caller-polaroid {
+    width: 75px;
+    height: 95px;
+    object-fit: cover;
+    border: 1px solid var(--text-primary);
+}
+
+.caller-rank-name {
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.caller-unit {
+    font-size: 11px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.crypto-status {
+    font-size: 10px;
+    opacity: 0.75;
+}
+
+.btn-terminal-call.accept {
+    background: #2e7d32;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: bold;
+    padding: 12px 24px;
+    border: 1px solid #4caf50;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+    animation: callAcceptPulse 1s infinite alternate;
+}
+
+@keyframes callAcceptPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.04); }
+}
+
+.transcript-box {
+    background: #000;
+    border: 1px solid var(--text-primary);
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.transcript-header {
+    font-size: 10px;
+    opacity: 0.6;
+    margin-bottom: 4px;
+}
+
+.transcript-text {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--text-primary);
+}
+
+.call-controls {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.call-controls .btn-terminal-action {
+    flex: 1;
+    font-size: 11px;
+    padding: 8px;
+}
+
+@media (max-width: 380px) {
+    .dossier-card {
+        padding: 8px;
+        gap: 10px;
+    }
+    .dossier-polaroid {
+        width: 72px;
+        height: 92px;
+    }
+    .dossier-name {
+        font-size: 13px;
+    }
+    .dossier-desc {
+        font-size: 11px;
+    }
+}

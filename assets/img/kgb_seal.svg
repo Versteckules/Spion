@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <circle cx="100" cy="100" r="92" fill="none" stroke="#e52b2b" stroke-width="4" stroke-dasharray="5,2"/>
+  <circle cx="100" cy="100" r="84" fill="none" stroke="#e52b2b" stroke-width="2"/>
+  <path id="textPathKGB" fill="none" d="M 25,100 A 75,75 0 1,1 175,100 A 75,75 0 1,1 25,100" />
+  <text font-family="monospace" font-size="9" fill="#e52b2b" letter-spacing="1.5" font-weight="bold">
+    <textPath href="#textPathKGB" startOffset="4%">КГБ СССР * КАРЛСХОРСТ * ОСОБЫЙ ОТДЕЛ *</textPath>
+  </text>
+  <rect x="97" y="35" width="6" height="130" fill="#e52b2b"/>
+  <rect x="75" y="55" width="50" height="6" fill="#e52b2b"/>
+  <path d="M100 62 L132 72 L132 112 C132 135 100 150 100 150 C100 150 68 135 68 112 L68 72 Z" fill="#1a0505" stroke="#e52b2b" stroke-width="3"/>
+  <polygon points="100,80 106,96 123,96 109,106 114,122 100,112 86,122 91,106 77,96 94,96" fill="#e52b2b"/>
+</svg>

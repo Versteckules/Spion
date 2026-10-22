@@ -1,0 +1,87 @@
+/* ==========================================================================
+   OFFLINETEST Simulator Toolbar CSS
+   ========================================================================== */
+
+.testuser-simulation-bar {
+    position: fixed;
+    top: 0; left: 0; width: 100%;
+    background: #111a11;
+    border-bottom: 2px solid #ffcc00;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.9);
+    z-index: 9999;
+    padding: max(6px, env(safe-area-inset-top)) 10px 6px 10px;
+}
+
+.testbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    padding-bottom: 2px;
+}
+
+.testbar-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: #ffcc00;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+}
+
+.testbar-buttons {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.btn-test-wp {
+    background: #222;
+    color: #fff;
+    border: 1px solid #ffcc00;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.15s;
+}
+
+.btn-test-wp:hover, .btn-test-wp.active {
+    background: #ffcc00;
+    color: #000;
+    font-weight: bold;
+}
+
+.testbar-events {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-test-ev {
+    background: #331111;
+    color: #ff9999;
+    border: 1px solid #ff4444;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.btn-test-ev:hover {
+    background: #ff4444;
+    color: #000;
+}
+
+/* Prevent test toolbar from overlapping header / cover on mobile */
+body.testbar-active .tactical-header {
+    margin-top: calc(44px + env(safe-area-inset-top, 0px));
+}
+
+body.testbar-active .cover-fullscreen {
+    padding-top: calc(max(18px, env(safe-area-inset-top)) + 46px) !important;
+}
+

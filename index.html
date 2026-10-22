@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>OPERATION SCHATTENTAUSCH – DER ZWISCHENFALL | Made by Versteckules</title>
+    <meta name="description" content="Interaktiver Kalter-Krieg-Spionage-Geocache an der Grenze Bayern/Sachsen (1983). D4 Mystery Thriller mit realem GPS, Sprachfunk, Krypto & Geigerzähler.">
+    <meta name="theme-color" content="#0a0e0a">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Leaflet CSS for Map (Local first, CDN fallback) -->
+    <link rel="stylesheet" href="css/leaflet.css">
+
+    <!-- Custom Retro & Military CSS Stylesheets -->
+    <link rel="stylesheet" href="css/terminal.css">
+    <link rel="stylesheet" href="css/cover.css">
+    <link rel="stylesheet" href="css/map.css">
+    <link rel="stylesheet" href="css/radar.css">
+    <link rel="stylesheet" href="css/dossier.css">
+    <link rel="stylesheet" href="css/nvg.css">
+    <link rel="stylesheet" href="css/geiger.css">
+    <link rel="stylesheet" href="css/testbar.css">
+    <link rel="stylesheet" href="css/mobile.css">
+</head>
+<body class="theme-green">
+
+    <!-- ======================================================================
+         1. COVER SCREEN (Startseite & 'Made by Versteckules')
+         ====================================================================== -->
+    <div id="cover-screen" class="cover-fullscreen">
+        <div class="cover-header-block">
+            <div class="cover-cache-badge">STRENG GEHEIM • BND / MFS ARCHIV 1983</div>
+            <h1 class="cover-main-title">OPERATION SCHATTENTAUSCH</h1>
+            <div class="cover-sub-title">DER ZWISCHENFALL AM GRENZGRABEN (BAYERN / SACHSEN)</div>
+            
+            <p class="cover-description">
+                Herbst 1983. Nebel über dem ehemaligen Grenzstreifen zwischen Bayern (Münchenreuth) und Sachsen (Gutenfürst). 
+                Ein geheimer Gefangenenaustausch zweier Spione soll vollzogen werden. Doch plötzlich peitscht ein Schuss durch das Niemandsland...
+            </p>
+        </div>
+
+        <!-- Owner Branding: Schräges avatar.jpg & Made by Versteckules -->
+        <div class="owner-branding-box">
+            <div class="avatar-tilted-frame" id="owner-avatar-frame" title="Made by Versteckules">
+                <div class="avatar-paperclip"></div>
+                <img src="assets/img/avatar.jpg" alt="Versteckules" class="avatar-img-element" />
+            </div>
+            <div class="owner-signature-text">Made by Versteckules</div>
+        </div>
+
+        <!-- Agent Registration Card (Erst Name eingeben, dann Seite wählen) -->
+        <div class="agent-registration-card">
+            <div class="agent-card-header">
+                <span class="agent-badge-title">AGENTEN-REGISTRIERUNG</span>
+                <span style="font-size: 11px; opacity: 0.7;">BND / MfS PROTOKOLL</span>
+            </div>
+
+            <div class="agent-input-group">
+                <label class="agent-input-label" for="agent-callsign-input">Dein Codename / Agentenname:</label>
+                <input type="text" id="agent-callsign-input" class="agent-name-input" placeholder="Agentenname eingeben (z.B. Adler-7)..." maxlength="25" autocomplete="off" autocorrect="off" />
+                <div id="agent-name-error" class="input-error-msg" style="display: none;">⚠️ Bitte zuerst einen Agentennamen eingeben!</div>
+            </div>
+
+            <div class="faction-prompt-text">Wähle nun deine Einsatzseite:</div>
+
+            <!-- Faction Selection Buttons -->
+            <div class="faction-select-area">
+                <button class="faction-card-btn west" onclick="GameEngine.handleFactionSelection('west')">
+                    <img src="assets/img/bnd_seal.svg" alt="BND Siegel" class="faction-seal" />
+                    <div class="faction-meta">
+                        <div class="faction-title">🦁 MISSION WEST (BAYERN / BND)</div>
+                        <div class="faction-sub">Start Münchenreuth • Führung: Xaver Huber (Bayrisch) • Bernstein CRT</div>
+                    </div>
+                </button>
+
+                <button class="faction-card-btn ost" onclick="GameEngine.handleFactionSelection('ost')">
+                    <img src="assets/img/mfs_seal.svg" alt="MfS Siegel" class="faction-seal" />
+                    <div class="faction-meta">
+                        <div class="faction-title">⚒️ MISSION OST (SACHSEN / MFS)</div>
+                        <div class="faction-sub">Start Gutenfürst • Führung: Ronny Schenk (Sächsisch) • Grüner CRT</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer link to Owner Admin HQ -->
+        <div class="cover-footer-bar">
+            <a href="admin.html" class="owner-admin-link">⚙️ HQ ADMIN / FINAL-EDITOR</a>
+        </div>
+    </div>
+
+    <!-- ======================================================================
+         1.5. MISSION BRIEFING MODAL (Visuelles Intro mit Bildern & Vorlesen)
+         ====================================================================== -->
+    <div id="mission-briefing-modal" class="tactical-modal-backdrop" style="display: none;">
+        <div class="briefing-modal-card">
+            
+            <div class="briefing-top-badge">
+                <span class="briefing-badge-text">STRENG GEHEIM: EINSATZBEFEHL</span>
+                <span class="briefing-agent-tag">Agent <b id="briefing-agent-display">Agent</b></span>
+            </div>
+
+            <!-- Commander Portrait & Audio Pitch -->
+            <div class="briefing-leader-row">
+                <div class="briefing-polaroid-frame">
+                    <img id="briefing-leader-img" src="assets/img/person_xaver.png" alt="Einsatzleiter" class="briefing-polaroid-img" />
+                </div>
+                <div class="briefing-leader-info">
+                    <div id="briefing-leader-name" class="briefing-leader-name">Xaver Huber</div>
+                    <div id="briefing-leader-rank" class="briefing-leader-rank">Polizeihauptkommissar • BND</div>
+                    <div id="briefing-leader-quote" class="briefing-leader-quote">"Aufpassen am Zaun! Keine unüberlegten Alleingänge im Grenzstreifen."</div>
+                </div>
+            </div>
+
+            <!-- 3 Clear Action Steps (Was ist zu tun?) -->
+            <div class="briefing-steps-list">
+                <div class="briefing-step-box">
+                    <div class="briefing-step-icon">🚶</div>
+                    <div class="briefing-step-content">
+                        <div class="briefing-step-title">1. MARSCHIEREN & ORTEN</div>
+                        <div class="briefing-step-desc">Folge dem Peilkompass und der Meter-Anzeige zu Station 1 am befestigten Grenzweg.</div>
+                    </div>
+                </div>
+
+                <div class="briefing-step-box">
+                    <div class="briefing-step-icon">🔍</div>
+                    <div class="briefing-step-content">
+                        <div class="briefing-step-title">2. ERMITTELN & EINGEBEN</div>
+                        <div class="briefing-step-desc">Suche vor Ort nach geheimen Hinweisen und gib gefundene Codes im Terminal ein.</div>
+                    </div>
+                </div>
+
+                <div class="briefing-step-box">
+                    <div class="briefing-step-icon">🎧</div>
+                    <div class="briefing-step-content">
+                        <div class="briefing-step-title">3. FUNK BEACHTEN</div>
+                        <div class="briefing-step-desc">Halte dein Audio laut! Bei Zwischenfällen schlägt dein Funkgerät Alarm.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Read Aloud / Vorlese-Audio Player -->
+            <div class="briefing-audio-section">
+                <div>
+                    <button id="btn-briefing-audio" class="btn-briefing-audio" onclick="GameEngine.toggleBriefingAudio()">
+                        <span>🔊</span> AUFTRAG VORLESEN
+                    </button>
+                </div>
+                <div class="audio-wave-anim" id="briefing-audio-wave">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+                <div class="briefing-audio-label">Echtzeit-Sprachausgabe</div>
+            </div>
+
+            <!-- Action Button: Start Game -->
+            <button class="btn-start-mission-action" onclick="GameEngine.startConfirmedMission()">
+                🚀 VERSTANDEN – EINSATZ STARTEN ▶
+            </button>
+
+        </div>
+    </div>
+
+    <!-- ======================================================================
+         1.8. RESET CONFIRMATION MODAL
+         ====================================================================== -->
+    <div id="modal-reset-confirm" class="tactical-modal-backdrop" style="display: none;">
+        <div class="tactical-modal-box">
+            <div class="modal-alert-header">
+                <span>⚠️</span> MISSION KOMPLETT ZURÜCKSETZEN?
+            </div>
+            <div class="modal-alert-text">
+                Möchtest du das gesamte Spiel wirklich zurücksetzen?<br><br>
+                • Alle erreichten Stationen werden zurückgesetzt<br>
+                • Alle eingegebenen Codes werden gelöscht<br>
+                • Du kehrst zur Startseite & Agenten-Auswahl zurück
+            </div>
+            <div class="modal-alert-actions">
+                <button class="btn-terminal-action secondary" onclick="GameEngine.cancelReset()">
+                    ❌ ABBRECHEN
+                </button>
+                <button class="btn-terminal-action danger" onclick="GameEngine.confirmReset()">
+                    🔄 JA, ALLES ZURÜCKSETZEN
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================================
+         2. APP MAIN HUD (Nach Missionsstart)
+         ====================================================================== -->
+    <div id="app-main" class="app-container" style="display: none;">
+        
+        <!-- Top Tactical Status Bar -->
+        <header class="tactical-header">
+            <div class="header-meta">
+                <div class="header-title" id="hud-faction-title">MISSION INITIALISIERT</div>
+                <div class="header-unit" id="hud-unit-display">AGENT: <span id="hud-agent-name">Agent</span> • GRENZABSCHNITT</div>
+            </div>
+
+            <div class="header-radar-quick">
+                <div class="mini-compass" title="Peilkompass zum nächsten Punkt">
+                    <div class="compass-arrow" id="radar-compass-needle"></div>
+                </div>
+                <div class="header-dist-box">
+                    <span id="radar-live-dist">-- m</span>
+                </div>
+            </div>
+
+            <!-- Mobile Outdoor Quick Tools -->
+            <div class="header-tools-row">
+                <button id="btn-toggle-sunlight" class="quick-tool-btn" onclick="MobileUX.toggleSunlightMode()" title="Sonnenmodus für draußen">
+                    ☀️ SONNE
+                </button>
+                <button id="btn-toggle-wakelock" class="quick-tool-btn" onclick="MobileUX.toggleWakeLock()" title="Bildschirm anlassen">
+                    💡 DISPLAY: AUS
+                </button>
+                <button id="btn-quick-replay" class="quick-tool-btn" onclick="AudioEngine.replayLast()" style="display: none;" title="Letzten Funkspruch wiederholen">
+                    🔄 FUNK
+                </button>
+                <button id="btn-reset-game" class="quick-tool-btn" onclick="GameEngine.promptReset()" title="Spiel komplett neu starten">
+                    🔄 RESET
+                </button>
+                <div id="gps-accuracy-badge" class="gps-badge searching">
+                    📡 GPS: SUCHE...
+                </div>
+            </div>
+        </header>
+
+        <!-- Off-Path Warning Banner (Minenstreifen) -->
+        <div id="off-path-warning-banner" class="off-path-banner" style="display: none;">
+            ⚠️ ACHTUNG: MINENSTREIFEN! SOFORT ZURÜCK AUF DEN BEFESTIGTEN GRENZWEG!
+        </div>
+
+        <!-- Main Tab Content Area -->
+        <main class="tab-content-area">
+
+            <!-- TAB 1: TERMINAL -->
+            <section id="tab-terminal" class="tab-view-panel active">
+                
+                <!-- Quick Re-open Briefing Button -->
+                <button class="btn-terminal-action secondary" style="margin-bottom: 8px; width: 100%; font-size: 11px; padding: 6px 10px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="GameEngine.openBriefingModal()">
+                    📋 EINSATZBEFEHL ANZEIGEN & VORLESEN
+                </button>
+
+                <div id="terminal-mission-area">
+                    <!-- Dynamic Act UI loaded here by GameEngine -->
+                </div>
+
+                <!-- Terminal System Logs -->
+                <div class="terminal-sys-log" id="terminal-sys-log">
+                    <div class="log-line"><span class="time">[INIT]</span> System betriebsbereit. Funkleitung gesichert.</div>
+                </div>
+
+                <!-- Command Input Row (Ohne OFFLINETEST-Beispiel im Placeholder) -->
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <input type="text" id="terminal-cmd-input" placeholder="Befehl oder Stations-Code eingeben..." class="terminal-input-field" style="margin-bottom: 0; flex: 1;" />
+                    <button id="btn-terminal-submit" class="btn-terminal-action" style="min-width: 52px; padding: 0 14px; display: flex; align-items: center; justify-content: center; font-size: 16px;" onclick="GameEngine.handleCommand(document.getElementById('terminal-cmd-input').value); document.getElementById('terminal-cmd-input').value='';">
+                        ↵
+                    </button>
+                </div>
+            </section>
+
+            <!-- TAB 2: KARTE (Hybrid OpenStreetMap) -->
+            <section id="tab-map" class="tab-view-panel">
+                <div id="map-container"></div>
+            </section>
+
+            <!-- TAB 3: DOSSIERS (7 Personen) -->
+            <section id="tab-dossiers" class="tab-view-panel">
+                <div class="dossiers-header-bar">
+                    <span style="font-size: 13px; font-weight: bold;">GEHEIMAKTEN [STRENG VERTRAULICH]</span>
+                    <button id="btn-toggle-nvg" class="btn-nvg-toggle" onclick="GameEngine.toggleNVG()">
+                        👁️ RESTLICHTVERSTÄRKER (NVG)
+                    </button>
+                </div>
+                <div class="dossier-list-grid" id="dossiers-list">
+                    <!-- Populated dynamically with the 7 polaroids -->
+                </div>
+            </section>
+
+            <!-- TAB 4: FUNK & SENSORS -->
+            <section id="tab-radio" class="tab-view-panel">
+                <!-- Geiger Counter Display -->
+                <div class="geiger-panel">
+                    <div class="geiger-header">
+                        <span>STRAHLUNGSSENSOR RADIAC-83 (WISMUT-ISOTOPE)</span>
+                        <span id="geiger-val" style="color: #ff3333; font-weight: bold;">0.00 μSv/h</span>
+                    </div>
+                    <div class="geiger-dial-frame">
+                        <div class="geiger-scale-markings">
+                            <span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50+</span>
+                        </div>
+                        <div class="geiger-needle" id="geiger-needle"></div>
+                    </div>
+                    <div class="geiger-footer">
+                        <span style="font-size: 10px; opacity: 0.7;">STATUS: AUTOMATISCHE ORTUNG AM GRENZGRABEN</span>
+                    </div>
+                </div>
+
+                <!-- KGB Cyrillic Cipher Slip -->
+                <div style="margin-top: 14px; text-align: center;">
+                    <img src="assets/img/cyrillic_cipher.svg" alt="KGB Chiffrierstreifen" style="max-width: 100%; border: 1px solid var(--text-primary);" />
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="bottom-nav-bar">
+            <button class="menu-tab-btn active" data-tab="terminal">
+                <span style="font-size: 18px;">📟</span>
+                <span>TERMINAL</span>
+            </button>
+            <button class="menu-tab-btn" data-tab="map">
+                <span style="font-size: 18px;">🗺️</span>
+                <span>KARTE</span>
+            </button>
+            <button class="menu-tab-btn" data-tab="dossiers">
+                <span style="font-size: 18px;">📁</span>
+                <span>DOSSIERS</span>
+            </button>
+            <button class="menu-tab-btn" data-tab="radio">
+                <span style="font-size: 18px;">📻</span>
+                <span>FUNK</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Leaflet JS (Local first, with fallback) -->
+    <script src="js/leaflet.js"></script>
+
+    <!-- Custom Modules -->
+    <script src="js/config.js"></script>
+    <script src="js/crypto.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/gps.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/geiger.js"></script>
+    <script src="js/phone.js"></script>
+    <script src="js/radio.js"></script>
+    <script src="js/stealth.js"></script>
+    <script src="js/triage.js"></script>
+    <script src="js/testuser.js"></script>
+    <script src="js/events.js"></script>
+    <script src="js/mobile.js"></script>
+    <script src="js/game.js"></script>
+
+    <!-- Service Worker Registration for Offline Capability -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('ServiceWorker registriert:', reg.scope))
+                    .catch(err => console.log('ServiceWorker Fehler:', err));
+            });
+        }
+    </script>
+</body>
+</html>

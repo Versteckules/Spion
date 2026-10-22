@@ -1,0 +1,60 @@
+/* ==========================================================================
+   Restlichtverstärker (NVG) & UV-Filter Styling
+   ========================================================================== */
+
+body.nvg-active {
+    filter: brightness(110%) contrast(140%);
+}
+
+body.nvg-active::before {
+    background: radial-gradient(circle, transparent 40%, rgba(0, 30, 0, 0.85) 90%),
+                repeating-linear-gradient(0deg, rgba(0, 255, 0, 0.15), rgba(0, 255, 0, 0.15) 1px, transparent 1px, transparent 2px);
+    background-size: 100% 100%, 100% 2px;
+}
+
+.nvg-mode {
+    background: #0d280d !important;
+    border-color: #00ff00 !important;
+    color: #00ff00 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.6) !important;
+}
+
+.nvg-mode .dossier-name {
+    color: #00ff00 !important;
+}
+
+.nvg-mode .dossier-rank, .nvg-mode .dossier-desc {
+    color: #a3ffa3 !important;
+}
+
+.nvg-clue {
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: #003300;
+    border: 1px dashed #00ff00;
+    color: #ffff00;
+    font-weight: bold;
+    font-size: 11px;
+    animation: uvGlow 1s infinite alternate;
+}
+
+@keyframes uvGlow {
+    from { text-shadow: 0 0 4px #ffff00; }
+    to { text-shadow: 0 0 12px #ffff00, 0 0 20px #00ff00; }
+}
+
+.btn-nvg-toggle {
+    background: transparent;
+    border: 1px solid var(--text-primary);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.btn-nvg-toggle.active {
+    background: #00ff00;
+    color: #000;
+    box-shadow: 0 0 12px #00ff00;
+}

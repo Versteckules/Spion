@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <circle cx="100" cy="100" r="92" fill="none" stroke="#d4af37" stroke-width="4" stroke-dasharray="6,3"/>
+  <circle cx="100" cy="100" r="84" fill="none" stroke="#d4af37" stroke-width="2"/>
+  <path id="textPathBND" fill="none" d="M 25,100 A 75,75 0 1,1 175,100 A 75,75 0 1,1 25,100" />
+  <text font-family="monospace" font-size="9.5" fill="#d4af37" letter-spacing="2" font-weight="bold">
+    <textPath href="#textPathBND" startOffset="4%">BAYERISCHE GRENZPOLIZEI * STRENG GEHEIM * BND *</textPath>
+  </text>
+  <path d="M100 48 L115 65 L140 60 L130 85 L145 105 L125 105 L130 140 L100 130 L70 140 L75 105 L55 105 L70 85 L60 60 L85 65 Z" fill="#d4af37" opacity="0.85"/>
+  <circle cx="100" cy="95" r="10" fill="#111" stroke="#d4af37" stroke-width="2"/>
+  <text x="100" y="99" font-family="monospace" font-size="11" font-weight="bold" fill="#d4af37" text-anchor="middle">1983</text>
+</svg>

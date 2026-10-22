@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <circle cx="100" cy="100" r="92" fill="none" stroke="#b32d2e" stroke-width="4" stroke-dasharray="4,3"/>
+  <circle cx="100" cy="100" r="84" fill="none" stroke="#b32d2e" stroke-width="2"/>
+  <path id="textPathMFS" fill="none" d="M 25,100 A 75,75 0 1,1 175,100 A 75,75 0 1,1 25,100" />
+  <text font-family="monospace" font-size="9" fill="#b32d2e" letter-spacing="1.5" font-weight="bold">
+    <textPath href="#textPathMFS" startOffset="3%">MINISTERIUM FÜR STAATSSICHERHEIT * HA II * DDR *</textPath>
+  </text>
+  <path d="M100 48 L138 60 L138 105 C138 135 100 155 100 155 C100 155 62 135 62 105 L62 60 Z" fill="none" stroke="#b32d2e" stroke-width="4"/>
+  <path d="M100 65 L108 85 L128 85 L112 98 L118 118 L100 106 L82 118 L88 98 L72 85 L92 85 Z" fill="#b32d2e" opacity="0.85"/>
+  <text x="100" y="135" font-family="monospace" font-size="10" font-weight="bold" fill="#b32d2e" text-anchor="middle">STRENG GEHEIM</text>
+</svg>

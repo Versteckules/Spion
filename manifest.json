@@ -1,0 +1,16 @@
+{
+  "name": "Operation Schattentausch – Der Zwischenfall",
+  "short_name": "Schattentausch",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0e0a",
+  "theme_color": "#33ff33",
+  "description": "D4 Spionage-Geocache an der Grenze Bayern/Sachsen (1983). Made by Versteckules.",
+  "icons": [
+    {
+      "src": "assets/img/avatar.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
